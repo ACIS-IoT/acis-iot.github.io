@@ -1,0 +1,18 @@
+const int T;
+const int CRANE_NUMBER = 2;
+
+Rmin=? [ C<=T ]/ (MAX*CRANE_NUMBER)
+
+Rmax=? [ C<=T ]/ (MAX*CRANE_NUMBER)
+
+Pmin=? [ true U<=T (m2_s=dr&m2_r=cr1&m2_pl=d) ]
+
+Pmax=? [ true U<=T (m2_s=dr&m2_r=cr1&m2_pl=d) ]
+
+Pmax=? [ !(BUFFER_1_pl=vx_pl| BUFFER_2_pl=vx_pl) U<=T (BUFFER_1_pl=vx_pl | BUFFER_2_pl=vx_pl) ]
+
+Pmin=? [ !(BUFFER_1_pl=vx_pl| BUFFER_2_pl=vx_pl) U<=T (BUFFER_1_pl=vx_pl | BUFFER_2_pl=vx_pl) ]
+
+Pmax=? [ !(BUFFER_1_r=vx_r| BUFFER_2_r=vx_r) U<=T (BUFFER_1_r=vx_r | BUFFER_2_r=vx_r) ]
+
+Pmin=? [ !(BUFFER_1_r=vx_r| BUFFER_2_r=vx_r) U<=T (BUFFER_1_r=vx_r | BUFFER_2_r=vx_r) ]
