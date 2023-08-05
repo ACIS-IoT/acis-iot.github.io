@@ -1,0 +1,6 @@
+const int T;
+const int CRANE_NUMBER = 2;
+
+Pmax=? [ !(BUFFER_1_pl=vx|BUFFER_2_pl=vx) U<=T (BUFFER_1_pl=vx|BUFFER_2_pl=vx) ]
+
+Pmin=? [ !(BUFFER_1_pl=vx|BUFFER_2_pl=vx) U<=T (BUFFER_1_pl=vx|BUFFER_2_pl=vx) ]
