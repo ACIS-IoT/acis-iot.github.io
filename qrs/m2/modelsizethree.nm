@@ -1,6 +1,6 @@
 mdp
 
-//PA model with buffer size = 2
+//PA model with buffer size = 3
 //properties in model.pctl
 
 const int cr1 = 1; //Identity of the crane 1
