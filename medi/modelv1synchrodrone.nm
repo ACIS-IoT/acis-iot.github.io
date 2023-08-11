@@ -1,0 +1,230 @@
+mdp
+
+//PA model with buffer size = 2
+//properties in model.pctl
+
+const int cr1 = 1; //Identity of the crane 1
+const int cr2 = 2; //Identity of the crane 2
+const int d;//Lifting height
+const int MAX=2;//Buffer size
+const int M=5;//Number of message sent
+
+const int EMPTY = -1;
+
+const double LAMBDA1=0.5;//pushing rate
+const double LAMBDA2=0.5;//pulling rate
+
+
+const int vx_s= -1;//Erroneous sender identity
+const int vx_r = -1;//Erroneous receiver identity
+const int vx = -1;//Erroneous payload generated from attacker
+
+const int n =2;//Number of attackers
+
+
+const int dr1=1; //Identity of the drone 1
+const int dr2=1; //Identity of the drone 2
+
+const int tdrift=2;//time progress in drifting
+
+const double drift;//drifting probability
+
+//Drone system
+module Drone1
+
+  m1_s: [-1..2]   init  dr1;
+  m1_r: [-1..2]   init  cr1;
+  m1_clock: [0..10] init 0;
+  m1_tick: [0..10] init 0;
+  m1_pl: [0..10] init d;
+
+  Drone1_l:[0..6] init 1;
+
+[PRODUCE1]   Drone1_l=1               -> (Drone1_l'=2) ;
+[DRIFTING1]   Drone1_l=2  & (m1_tick<M-tdrift)  -> (1-drift):(Drone1_l'=3) & (m1_tick'=m1_tick+1)+drift:(Drone1_l'=3) & (m1_tick'=m1_tick+tdrift);
+[PCS] Drone1_l=3   -> (Drone1_l'=4);
+[PCR] Drone1_l=4   -> (Drone1_l'=5);
+[INCREMENT1]   Drone1_l=5  & (m1_clock<M-m1_tick) -> (Drone1_l'=6) & (m1_clock'=m1_clock+m1_tick);
+[TRANSMIT_1]    Drone1_l=6                -> (Drone1_l'=1) & (m1_tick'=0);
+endmodule
+
+
+//Drone system
+module Drone2
+
+  m2_s: [-1..2]   init  dr2;
+  m2_r: [-1..2]   init  cr2;
+  m2_clock: [0..10] init 0;
+  m2_tick: [0..10] init 0;
+  m2_pl: [0..10] init d;
+
+  Drone2_l:[0..6] init 1;
+
+[PRODUCE2]   Drone2_l=1                 -> (Drone2_l'=2) ;
+[DRIFTING2]   Drone2_l=2  & (m2_tick<M-tdrift)  -> (1-drift):(Drone2_l'=3) & (m2_tick'=m2_tick+1)+drift:(Drone2_l'=3) & (m2_tick'=m2_tick+tdrift);
+[PCS] Drone2_l=3   -> (Drone2_l'=4);
+[PCR] Drone2_l=4   -> (Drone2_l'=5);
+[INCREMENT2]   Drone2_l=5  & (m2_clock<M-m2_tick) -> (Drone2_l'=6) & (m2_clock'=m2_clock+m2_tick);
+[TRANSMIT_2]    Drone2_l=6                 -> (Drone2_l'=1) & (m2_tick'=0);
+endmodule
+
+//Synchronization system
+module synchronization
+
+
+  c:[0..4] init 1;
+  c_tick: [0..10] init 0;
+
+[PCS]     c=1  & (c_tick<M-tdrift) -> (c'=2)&(c_tick'=floor((m1_tick+m2_tick)/2));
+[PCR]     c=2  -> (c'=1);
+endmodule
+
+//MPS Connecor 1
+module Connector_1
+
+WRITE_1: [0..1] init 0;
+READ_1 : [0..1] init 0;
+
+BUFFER_1_s: [-1..2] init -1;
+
+BUFFER_1_r: [-1..2] init -1;
+
+BUFFER_1_ts: [-1..10] init -1;
+
+BUFFER_1_pl: [-10..10] init -2;
+
+
+BUFFER_2: [-1..2] init -1;
+
+BUFFER_2_s: [-1..2] init -1;
+
+BUFFER_2_r: [-1..2] init -1;
+
+BUFFER_2_ts: [-1..10] init -1;
+
+BUFFER_2_pl: [-10..10] init -2;
+
+
+v_s: [-1..2] init -1;
+v_r: [-1..2] init -1;
+v_ts: [-1..10] init -1;
+v_pl: [-10..10] init -2;
+
+
+
+
+BUFFER_SIZE: [0..10] init 0;
+C1_L : [1..6] init 1;
+
+
+[INITIAL_C1_1]  C1_L=1 & (BUFFER_SIZE<MAX | BUFFER_SIZE>0) ->  0.5:(C1_L'=2)+0.5:(C1_L'=4);
+
+[TRANSMIT_1] C1_L=2 & BUFFER_SIZE<MAX  ->  (C1_L'=3) &(v_s'=m1_s)&(v_r'=m1_r)&(v_ts'=m1_clock)&(v_pl'=m1_pl) ;
+
+[FULL]     C1_L=2 & BUFFER_SIZE=MAX  ->  (C1_L'=1);
+
+[PUSH_BUFFER_1]     C1_L=3 & BUFFER_SIZE<MAX & WRITE_1=0 ->  (C1_L'=1) & (WRITE_1'=1) & (BUFFER_1_s'=v_s) & (BUFFER_1_r'=v_r) & (BUFFER_1_ts'=v_ts) & (BUFFER_1_pl'=v_pl) & (BUFFER_SIZE'=BUFFER_SIZE+1);
+
+[PUSH_BUFFER_2]     C1_L=3 & BUFFER_SIZE<MAX & WRITE_1=1 ->  (C1_L'=1) & (WRITE_1'=0)&  (BUFFER_2_s'=v_s) & (BUFFER_2_r'=v_r) & (BUFFER_2_ts'=v_ts) & (BUFFER_2_pl'=v_pl) & (BUFFER_SIZE'=BUFFER_SIZE+1);
+
+[PULL_BUFFER_1]     C1_L=4 & BUFFER_SIZE>0   & READ_1=0 ->  (C1_L'=5) & (READ_1'=1) & (v_s'=BUFFER_1_s) & (v_r'=BUFFER_1_r) & (v_ts'=BUFFER_1_ts) & (v_pl'=BUFFER_1_pl) & (BUFFER_SIZE'=BUFFER_SIZE-1) ;
+
+[PULL_BUFFER_2]     C1_L=4 & BUFFER_SIZE>0   & READ_1=1 ->  (C1_L'=5)& (READ_1'=0) & (v_s'=BUFFER_2_s) & (v_r'=BUFFER_2_r) & (v_ts'=BUFFER_2_ts) & (v_pl'=BUFFER_2_pl) & (BUFFER_SIZE'=BUFFER_SIZE-1) ;
+
+[EMPTY]    	    C1_L=4 & BUFFER_SIZE=0    ->  (C1_L'=1);
+
+[RECEIVE_C1]  C1_L=5 & (v_s>0) & (v_r>0)  & (v_ts>0) &  (v_pl>0)->  (C1_L'=1) & (v_s'=EMPTY) & (v_r'=EMPTY) & (v_ts'=EMPTY) & (v_pl'=EMPTY);
+
+endmodule
+
+
+
+//crane 1 component
+module Crane_1
+  LC1 : [0..3] init  1;
+  m3_s: [-1..2] init EMPTY;
+  m3_r: [-1..2] init EMPTY;
+  m3_t: [-1..10] init EMPTY;
+  m3_pl: [-10..10] init EMPTY;
+
+
+[RECEIVE_C1]   LC1=1 & (m3_s=EMPTY)& (m3_r=EMPTY)& (m3_t=EMPTY)& (m3_pl=EMPTY)   -> (LC1'=2) & (m3_s'=v_s) & (m3_r'=v_r) & (m3_t'=v_ts) & (m3_pl'=v_pl);
+//External port LIFT 
+[LIFT]       LC1=2   -> (LC1'=1) & (m3_s'=EMPTY) & (m3_r'=EMPTY) & (m3_t'=EMPTY) & (m3_pl'=EMPTY);
+endmodule
+
+
+//MPS Connecor 2
+module Connector_2
+
+
+WRITE_2 : [0..1] init 0;
+
+READ_2  : [0..1] init 0;
+
+BUFFER2_1_s: [-1..2] init -1;
+
+BUFFER2_1_r: [-1..2] init -1;
+
+BUFFER2_1_ts: [-1..10] init -1;
+
+BUFFER2_1_pl: [-10..10] init -2;
+
+
+BUFFER2_2: [-1..2] init -1;
+
+BUFFER2_2_s: [-1..2] init -1;
+
+BUFFER2_2_r: [-1..2] init -1;
+
+BUFFER2_2_ts: [-1..10] init -1;
+
+BUFFER2_2_pl: [-10..10] init -2;
+
+v2_s: [-1..2] init -1;
+v2_r: [-1..2] init -1;
+v2_ts: [-1..10] init -1;
+v2_pl: [-10..10] init -2;
+
+buffer_size2: [0..10] init 0;
+
+C2_L : [1..6] init 1;
+
+vid2: [-1..2] init EMPTY;
+
+[INITIAL_C21]  C2_L=1 & (buffer_size2<MAX | buffer_size2>0) ->  0.5:(C2_L'=2)+0.5:(C2_L'=4);
+
+[TRANSMIT_2] C2_L=2 & buffer_size2<MAX  ->  (C2_L'=3) &(v2_s'=m2_s)&(v2_r'=m2_r)&(v2_ts'=m2_clock)&(v2_pl'=m2_pl);
+
+[FULL2]     C2_L=2 & buffer_size2=MAX  ->  (C2_L'=1);
+
+[PUSH_BUFFER2_1]     C2_L=3 & buffer_size2<MAX & WRITE_2=0 ->  (C2_L'=1) & (WRITE_2'=1)  & (BUFFER2_1_s'=v2_s) & (BUFFER2_1_r'=v2_r) & (BUFFER2_1_ts'=v2_ts) & (BUFFER2_1_pl'=v2_pl) & (buffer_size2'=buffer_size2+1);
+
+[PUSH_BUFFER2_2]     C2_L=3 & buffer_size2<MAX & WRITE_2=1 ->  (C2_L'=1)& (WRITE_2'=0)  & (BUFFER2_2_s'=v2_s) & (BUFFER2_2_r'=v2_r) & (BUFFER2_2_ts'=v2_ts) & (BUFFER2_2_pl'=v2_pl) & (buffer_size2'=buffer_size2+1);
+
+
+[PULL_BUFFER2_1]     C2_L=4 & buffer_size2>0   & READ_2=0  ->  (C2_L'=5)& (READ_2'=1) & (v2_s'=BUFFER2_1_s) & (v2_r'=BUFFER2_1_r) & (v2_ts'=BUFFER2_1_ts) & (v2_pl'=BUFFER2_1_pl) ;
+
+[PULL_BUFFER2_2]     C2_L=4 & buffer_size2>0   & READ_2=1  ->  (C2_L'=5)& (READ_2'=0) & (v2_s'=BUFFER2_2_s) & (v2_r'=BUFFER2_2_r) & (v2_ts'=BUFFER2_2_ts) & (v2_pl'=BUFFER2_2_pl) & (buffer_size2'=buffer_size2-1);
+
+[EMPTY2]      C2_L=4 & buffer_size2=0    ->  (C2_L'=1);
+
+[RECEIVE_C2]  C2_L=5 & (v2_s>0) & (v2_r>0)  & (v2_ts>0) &  (v2_pl>0) ->  (C2_L'=1) & (v2_s'=EMPTY) & (v2_r'=EMPTY) & (v2_ts'=EMPTY) & (v2_pl'=EMPTY);
+
+endmodule
+
+
+
+
+//crane 2 component
+module Crane_2
+  LC2 : [0..3] init  1;
+  m4_s: [-1..2] init EMPTY;
+  m4_r: [-1..2] init EMPTY;
+  m4_t: [-1..10] init EMPTY;
+  m4_pl: [-10..10] init EMPTY;
+
+[RECEIVE_C2]   LC2=1 & (m4_s=EMPTY)& (m4_r=EMPTY)& (m4_t=EMPTY)& (m4_pl=EMPTY)    -> (LC2'=2) & (m4_s'=v2_s) & (m4_r'=v2_r) & (m4_t'=v2_ts) & (m4_pl'=v2_pl);
+//External port LIFT
+[LIFT]       LC2=2   -> (LC2'=1) & (m4_s'=EMPTY) & (m4_r'=EMPTY) & (m4_t'=EMPTY) & (m4_pl'=EMPTY);
+endmodule
