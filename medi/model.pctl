@@ -1,0 +1,6 @@
+const int T;
+const int CRANE_NUMBER = 2;
+
+Pmin=? [ true U<=T (m3_s=dr1&m3_r=cr1&m4_s=dr2&m4_r=cr2&m3_pl=m4_pl&m3_t=m4_t) ]
+
+Pmax=? [ true U<=T (m3_s=dr1&m3_r=cr1&m4_s=dr2&m4_r=cr2&m3_pl=m4_pl&m3_t=m4_t) ]
