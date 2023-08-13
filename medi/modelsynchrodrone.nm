@@ -43,7 +43,7 @@ module Drone1
 [PRODUCE]   Drone1_l=1               -> (Drone1_l'=2) ;
 [DRIFTING]   Drone1_l=2  & (m1_tick<M-tdrift)  -> (1-drift):(Drone1_l'=3) & (m1_tick'=m1_tick+1)+drift:(Drone1_l'=3) & (m1_tick'=m1_tick+tdrift);
 [PCS] Drone1_l=3   -> (Drone1_l'=4);
-[PCR] Drone1_l=4   -> (Drone1_l'=5);
+[PCR] Drone1_l=4   -> (Drone1_l'=5)& (m2_tick'=c_tick);
 [INCREMENT]   Drone1_l=5  & (m1_clock<M-m1_tick) -> (Drone1_l'=6) & (m1_clock'=m1_clock+m1_tick);
 [TRANSMIT_1]    Drone1_l=6                -> (Drone1_l'=1) & (m1_tick'=0);
 endmodule
