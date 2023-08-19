@@ -14,15 +14,14 @@ client = mqtt.Client()
 client.connect(broker_address, broker_port)
 
 def send_sensor_rp_data():
-  while True:
-      # Generate random rainfall data between 0 and 100 mm/hr
-      rainfall = round(random.uniform(0, 100), 2)
+    # Generate random rainfall data between 0 and 100 mm/hr
+    rainfall = round(random.uniform(0, 100), 2)
     
-      # Publish the rainfall data to the MQTT topic
-      client.publish(topic, str(rainfall))
+    # Publish the rainfall data to the MQTT topic
+    client.publish(topic, str(rainfall))
     
-      # Print the sent message for verification (optional)
-      print(f"Rainfall: {rainfall} mm/hr")
+    # Print the sent message for verification (optional)
+    print(f"Rainfall: {rainfall} mm/hr")
 
 
 try:
