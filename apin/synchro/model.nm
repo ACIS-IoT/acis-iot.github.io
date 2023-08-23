@@ -1,7 +1,7 @@
 csg
 
 
-// The model is checked with properties file properties.pctl
+// The model is checked with properties file scalability.pctl
 
 player p1 WLSensor endplayer
 player p2 RPSensor endplayer
@@ -95,8 +95,8 @@ CN1: [1..6] init 1;
 
 
 
-[CLOUD_WF]    CN1=1  ->  (CN1'=5) ;
-[READ_WF , ATTACK_STATUS]    CN1=5  ->  freq: (CN1'=1) & (BUFFER_WF'= wf) +(1-freq):(BUFFER_WF'=ATTACKER_PL);
+[CLOUD_WF]                   CN1=1  ->  (CN1'=5)& (BUFFER_WF'= wf) ;
+[READ_WF ]    CN1=5  ->  (CN1'=1) ;
 
 endmodule
 
@@ -121,3 +121,4 @@ module CloudServer
 [CLOUD_WF]    cloud_loc=1   -> (cloud_loc'=0);
 
 endmodule
+
