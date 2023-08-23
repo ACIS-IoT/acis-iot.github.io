@@ -67,9 +67,13 @@ module WFActuator
   wf_loc: [0..3] init 0;
 
 [ACTUATOR_WF_SUBSCRIBE]    wf_loc=0 -> (wf_loc'=1);
-[ACTUATE_WF] wf_loc=1 -> (wf_loc'=0)&(wf_pl'=WF);
+[ACTUATE_WF_GET] wf_loc=1 -> (wf_loc'=2)&(wf_pl'=WF);
+[ACTUATE_WF_SET] wf_loc=2 -> (wf_loc'=0);
 endmodule
 
+rewards "correct"
+	[ACTUATE_WF_SET] wf_pl!=-1: 1;
+endrewards
 
 
 //SouthBoundBrifge COMPONENT
@@ -151,3 +155,4 @@ module CloudServer
 [CLOUD_WF]  cloud_loc=1   -> (cloud_loc'=0)&(cloud_wf'=EMPTY);
 
 endmodule
+
