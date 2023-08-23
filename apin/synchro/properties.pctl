@@ -1,0 +1,8 @@
+const int T;
+const int Z = -1;
+
+<<p1,p2,p3,p4,p5,p6,p7>>Pmax=? [ F<=T (wf_pl!=-1) ]
+
+<<p1,p2,p3,p4,p5,p6,p7>>Pmin=? [ F<=T (wf_pl!=-1) ]
+
+<<p1,p2,p3,p4,p5,p6,p7>>R{"correct"}max=? [ C<=T ]
