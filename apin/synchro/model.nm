@@ -66,8 +66,8 @@ module WFActuator
   wf_pl: [INIT_VAL..MAX_VAL] init -1;
   wf_loc: [0..3] init 0;
 
-[ACTUATOR_WF_SET_RECEIVE]    wf_loc=0 -> (wf_loc'=1)&(wf_pl'=WF);
-[ACTUATE_WF] wf_loc=1 -> (wf_loc'=0);
+[ACTUATOR_WF_SUBSCRIBE]    wf_loc=0 -> (wf_loc'=1);
+[ACTUATE_WF] wf_loc=1 -> (wf_loc'=0)&(wf_pl'=WF);
 endmodule
 
 
@@ -83,18 +83,19 @@ BUFFER_WF: [INIT_VAL..MAX_VAL]  init -1;
 
 CN1: [1..2] init 1;
 
+//inputs to the edge
 [SENSOR_WL , ATTACK_STATUS, SENSOR_WL_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_WL'= wl_pl)      +  freq:(BUFFER_WL'=ATTACKER_PL);
 [SENSOR_RP , ATTACK_STATUS, SENSOR_RP_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_RP'= rp_pl)      +  freq:(BUFFER_RP'=ATTACKER_PL);
 [SENSOR_WV , ATTACK_STATUS, SENSOR_WV_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_WV'= wv_pl)      +  freq:(BUFFER_WV'=ATTACKER_PL);
 [CLOUD_WF  , ATTACK_STATUS,  CLOUD_WF_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_WF'= cloud_wf)   +  freq:(BUFFER_WF'=ATTACKER_PL);
 
-
+//outputs of the edge
 [CLOUD_WL_SET_RECEIVE , CLOUD_WL_SET]    CN1=1  -> (CN1'=1);
 [CLOUD_WV_SET_RECEIVE , CLOUD_WV_SET]    CN1=1  -> (CN1'=1);
 [CLOUD_RP_SET_RECEIVE , CLOUD_RP_SET]    CN1=1  -> (CN1'=1);
 
 
-[ACTUATOR_WF_SET_RECEIVE , ACTUATOR_WF_SET]    CN1=1  -> (CN1'=1);
+[ACTUATOR_WF_SUBSCRIBE , ACTUATOR_WF_SET]    CN1=1  -> (CN1'=1);
 endmodule
 
 
