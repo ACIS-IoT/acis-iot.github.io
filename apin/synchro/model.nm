@@ -1,0 +1,123 @@
+csg
+
+
+// The model is checked with properties file properties.pctl
+
+player p1 WLSensor endplayer
+player p2 RPSensor endplayer
+player p3 WVSensor endplayer
+player p4 CloudServer endplayer
+player p5 WFActuator endplayer
+
+//attackers
+player p6 Attacker endplayer
+
+const int EMPTY = -1;
+const int ATTACK_VAL = -1;
+const int INIT_VAL = -1;
+const int MAX_VAL = 3;
+
+
+const double freq ;
+
+//Attacker Model
+module Attacker  
+  ATTACKER_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+  //attack: bool;
+  //attack_loc: [0..1] init 0;
+
+//[ATTACKER_MODE] attack_loc=0 ->  0.5:(attack_loc'=1) & (attack'=true)+ 0.5:(attack_loc'=1) & (attack'=false);
+[ATTACK_STATUS] true -> true ;
+
+endmodule
+
+
+//Water Level Model
+module WLSensor
+  wl_pl: [INIT_VAL..MAX_VAL] init 1;
+  wl_loc: [0..3] init 0;
+
+[PRODUCE_WL]   wl_loc=0   -> (wl_loc'=1);
+[SENSOR_WL]    wl_loc=1   -> (wl_loc'=0);
+
+endmodule
+
+
+//RP Level Model
+module RPSensor
+  rp_pl: [INIT_VAL..MAX_VAL]init 1;
+  rp_loc: [0..3] init 0;
+
+[PRODUCE_RP]   rp_loc=0   -> (rp_loc'=1);
+[SENSOR_RP]    rp_loc=1   -> (rp_loc'=0);
+
+endmodule
+
+
+//WV Level Model
+module WVSensor
+  wv_pl: [INIT_VAL..MAX_VAL] init 1;
+  wv_loc: [0..3] init 0;
+
+[PRODUCE_WV]   wv_loc=0   -> (wv_loc'=1);
+[SENSOR_WV]    wv_loc=1   -> (wv_loc'=0);
+
+endmodule
+
+//WF Level Model
+module WFActuator
+  wf_pl: [INIT_VAL..MAX_VAL] init -1;
+  wf_loc: [0..3] init 0;
+
+[READ_WF]    wf_loc=0 -> (wf_loc'=1)&(wf_pl'=BUFFER_WF);
+[ACTUATE_WF] wf_loc=1 -> (wf_loc'=0);
+endmodule
+
+//EDGE SERVER COMPONENT
+//[SENSOR_WL , ATTACK_STATUS]    CN1=1  ->  (CN1'=2) & (BUFFER_WL'=(attack=true)?ATTACKER_PL: wl_pl);
+module Edge
+
+BUFFER_WL: [-1..10] init -1;
+BUFFER_RP: [-1..10] init -1;
+BUFFER_WV: [-1..10] init -1;
+BUFFER_WF: [-1..10] init -1;
+
+CN1: [1..6] init 1;
+
+[SENSOR_WL , ATTACK_STATUS]    CN1=1  ->  freq: (CN1'=2) & (BUFFER_WL'= wl_pl) +(1-freq):(BUFFER_WL'=ATTACKER_PL);
+[READ_WL]   CN1=2  ->  (CN1'=1);
+
+[SENSOR_RP , ATTACK_STATUS]    CN1=1  ->  freq: (CN1'=3) & (BUFFER_RP'= rp_pl) +(1-freq):(BUFFER_RP'=ATTACKER_PL);
+[READ_RP]   CN1=3  ->  (CN1'=1);
+
+[SENSOR_WV , ATTACK_STATUS]    CN1=1  ->  freq: (CN1'=4) & (BUFFER_WV'= wv_pl) +(1-freq):(BUFFER_WV'=ATTACKER_PL);
+[READ_WV]   CN1=4  ->  (CN1'=1);
+
+
+
+[CLOUD_WF]    CN1=1  ->  (CN1'=5) ;
+[READ_WF , ATTACK_STATUS]    CN1=5  ->  freq: (CN1'=1) & (BUFFER_WF'= wf) +(1-freq):(BUFFER_WF'=ATTACKER_PL);
+
+endmodule
+
+
+
+
+//CLOUD SERVER COMPONENT
+
+//WV Level Model
+module CloudServer
+  wv: [INIT_VAL..MAX_VAL] init EMPTY;
+  wl: [INIT_VAL..MAX_VAL] init EMPTY;
+  rp: [INIT_VAL..MAX_VAL] init EMPTY;
+  wf: [INIT_VAL..MAX_VAL] init 2;
+  cloud_loc: [0..3] init 0;
+
+[READ_WV]   cloud_loc=0   -> (cloud_loc'=0)&(wv'=BUFFER_WV);
+[READ_WL]   cloud_loc=0   -> (cloud_loc'=0)&(wl'=BUFFER_WL);
+[READ_RP]   cloud_loc=0   -> (cloud_loc'=0)&(rp'=BUFFER_RP);
+
+[LEARN_WF]    cloud_loc=0   -> (cloud_loc'=1);
+[CLOUD_WF]    cloud_loc=1   -> (cloud_loc'=0);
+
+endmodule
