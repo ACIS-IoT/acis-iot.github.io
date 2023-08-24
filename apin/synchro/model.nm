@@ -1,7 +1,7 @@
 csg
 
-
-// The model is checked with properties file scalability.pctl
+// The communication model relies on synchronized communication style
+// The model is checked with properties file properties.pctl
 
 player p1 WLSensor endplayer
 player p2 RPSensor endplayer
@@ -72,18 +72,16 @@ module WFActuator
 endmodule
 
 rewards "correct"
-	[ACTUATE_WF_SET] wf_pl!=-1: 1;
+	[ACTUATE_WF_SET] wf_pl!=EMPTY: 1;
 endrewards
 
 
-//SouthBoundBrifge COMPONENT
-//[SENSOR_WL , ATTACK_STATUS]    CN1=1  ->  (CN1'=2) & (BUFFER_WL'=(attack=true)?ATTACKER_PL: wl_pl);
-module EdgeBridge
+//SouthBoundBridge COMPONENT
+module SouthBoundEdgeBridge
 
 BUFFER_WL: [INIT_VAL..MAX_VAL]  init -1;
 BUFFER_RP: [INIT_VAL..MAX_VAL]  init -1;
 BUFFER_WV: [INIT_VAL..MAX_VAL]  init -1;
-BUFFER_WF: [INIT_VAL..MAX_VAL]  init -1;
 
 CN1: [1..2] init 1;
 
@@ -91,14 +89,9 @@ CN1: [1..2] init 1;
 [SENSOR_WL , ATTACK_STATUS, SENSOR_WL_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_WL'= wl_pl)      +  freq:(BUFFER_WL'=ATTACKER_PL);
 [SENSOR_RP , ATTACK_STATUS, SENSOR_RP_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_RP'= rp_pl)      +  freq:(BUFFER_RP'=ATTACKER_PL);
 [SENSOR_WV , ATTACK_STATUS, SENSOR_WV_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_WV'= wv_pl)      +  freq:(BUFFER_WV'=ATTACKER_PL);
-[CLOUD_WF  , ATTACK_STATUS,  CLOUD_WF_SUBSCRIBE]    CN1=1  ->  (1-freq): (CN1'=1) & (BUFFER_WF'= cloud_wf)   +  freq:(BUFFER_WF'=ATTACKER_PL);
-
-//outputs of the edge
-[CLOUD_WL_SET_RECEIVE , CLOUD_WL_SET]    CN1=1  -> (CN1'=1);
-[CLOUD_WV_SET_RECEIVE , CLOUD_WV_SET]    CN1=1  -> (CN1'=1);
-[CLOUD_RP_SET_RECEIVE , CLOUD_RP_SET]    CN1=1  -> (CN1'=1);
 
 
+//outputs to the actuator
 [ACTUATOR_WF_SUBSCRIBE , ACTUATOR_WF_SET]    CN1=1  -> (CN1'=1);
 endmodule
 
@@ -134,11 +127,25 @@ edge_loc: [1..10] init 1;
 endmodule
 
 
+//NorthBoundBridge COMPONENT
+module NorthBoundEdgeBridge
+
+BUFFER_WF: [INIT_VAL..MAX_VAL]  init EMPTY;
+
+CN2: [1..2] init 1;
+
+[CLOUD_WF  , ATTACK_STATUS,  CLOUD_WF_SUBSCRIBE]    CN2=1  ->  (1-freq): (CN2'=1) & (BUFFER_WF'= cloud_wf)   +  freq:(BUFFER_WF'=ATTACKER_PL);
+
+//outputs of the edge
+[CLOUD_WL_SET_RECEIVE , CLOUD_WL_SET]    CN2=1  -> (CN2'=1);
+[CLOUD_WV_SET_RECEIVE , CLOUD_WV_SET]    CN2=1  -> (CN2'=1);
+[CLOUD_RP_SET_RECEIVE , CLOUD_RP_SET]    CN2=1  -> (CN2'=1);
+
+endmodule
 
 
 //CLOUD SERVER COMPONENT
 
-//WV Level Model
 module CloudServer
   cloud_wv: [INIT_VAL..MAX_VAL] init EMPTY;
   cloud_wl: [INIT_VAL..MAX_VAL] init EMPTY;
