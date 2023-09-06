@@ -1,0 +1,132 @@
+csg
+
+const int scenario; // 1 or 2
+
+//The model evaluates the southbound bridges sensitive to attacks
+// The communication model relies on synchronized communication style
+// The model is checked with properties file properties.pctl
+
+player p1 WLSensor endplayer
+player p2 RPSensor endplayer
+player p3 WVSensor endplayer
+player p4 EdgeServer endplayer
+
+//attackers
+player p5 Attacker endplayer
+
+
+const int EMPTY = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = -2;
+const int MAX_VAL = 3;
+
+//Attaque frequency
+const double freq =scenario=1 ? 0.2 : 0.8;
+
+//Edge Processing Cycles
+const int u ;
+
+const int rounds; // number of rounds
+
+module rounds
+
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
+
+//Attacker Model
+module Attacker  
+  ATTACKER_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+[SENSOR_AT_R]    r<rounds   -> true;
+
+endmodule
+
+//Water Level Model
+module WLSensor
+  wl_pl: [INIT_VAL..MAX_VAL] init 1;
+[SENSOR_WL_R]    r<rounds   -> true;
+[READ_WL]        r<rounds   -> true;
+endmodule
+
+
+//RP Level Model
+module RPSensor
+  rp_pl: [INIT_VAL..MAX_VAL]init 1;
+[SENSOR_RP_R]    r<rounds   -> true;
+[READ_RP]        r<rounds-> true;
+endmodule
+
+
+//WV Level Model
+module WVSensor
+  wv_pl: [INIT_VAL..MAX_VAL] init 1;
+[SENSOR_WV_R]    r<rounds   -> true;
+[READ_WV]      r<rounds   -> true;
+endmodule
+
+
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL
+
+ BUFFER_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+
+CN1: [1..2] init 1;
+[SENSOR_WL_R ,SENSOR_AT_R]    CN1=1  ->  (1-freq):(CN1'=2) &(BUFFER_WL'= wl_pl) + freq:(CN1'=2) & (BUFFER_WL'=ATTACKER_PL)   ;
+[READ_WL,SENSOR_WL_SUBSCRIBE] CN1=2 & BUFFER_WL!=EMPTY -> (CN1'=1)&(BUFFER_WL'= EMPTY);
+endmodule
+
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP
+
+ BUFFER_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+
+CN12: [1..2] init 1;
+[SENSOR_RP_R ,SENSOR_AT_R]    CN12=1  ->  (1-freq):(CN12'=2) &(BUFFER_RP'= rp_pl) + freq:(CN12'=2) & (BUFFER_RP'=ATTACKER_PL)   ;
+[READ_RP,SENSOR_RP_SUBSCRIBE] CN12=2        & BUFFER_RP!=EMPTY          ->  (CN12'=1) &(BUFFER_RP'= EMPTY);
+endmodule
+
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV
+
+ BUFFER_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+CN13: [1..2] init 1;
+[SENSOR_WV_R ,SENSOR_AT_R]    CN13=1  ->  (1-freq):(CN13'=2) &(BUFFER_WV'= rp_pl) + freq:(CN13'=2) & (BUFFER_WV'=ATTACKER_PL)   ;
+[READ_WV,SENSOR_WV_SUBSCRIBE] CN13=2        & BUFFER_WV!=EMPTY                      ->  (CN13'=1) &(BUFFER_WV'= EMPTY);
+endmodule
+
+
+
+//energy consumption model during attacks
+rewards "energy"
+	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 2.1514 * u + 4.142;
+endrewards
+
+//EDGE SERVER COMPONENT
+module EdgeServer
+
+WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+WF: [INIT_VAL..MAX_VAL]  init EMPTY;
+
+edge_loc: [1..10] init 1;
+
+[SENSOR_WL_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=2);
+[SENSOR_WL_GET]   edge_loc=2  ->  (edge_loc'=3) & (WL'=BUFFER_WL) ;
+[CLOUD_WL_SET]   edge_loc=3  ->  (edge_loc'=1);
+
+[SENSOR_RP_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=4);
+[SENSOR_RP_GET]   edge_loc=4  ->  (edge_loc'=5) & (RP'=BUFFER_RP) ;
+[CLOUD_RP_SET]   edge_loc=5  ->  (edge_loc'=1);
+
+[SENSOR_WV_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=6);
+[SENSOR_WV_GET]   edge_loc=6  ->  (edge_loc'=7) & (WV'=BUFFER_WV) ;
+[CLOUD_WV_SET]   edge_loc=7  ->  (edge_loc'=1);
+endmodule
