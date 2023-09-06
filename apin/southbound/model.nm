@@ -1,6 +1,6 @@
 csg
 
-const int scenario; // 1 or 2
+const int scenario; // 0 or 1 or 2
 
 //The model evaluates the southbound bridges sensitive to attacks
 // The communication model relies on synchronized communication style
@@ -21,7 +21,7 @@ const int INIT_VAL = -2;
 const int MAX_VAL = 3;
 
 //Attaque frequency
-const double freq =scenario=1 ? 0.2 : 0.8;
+const double freq =scenario=0?0:(scenario=1 ? 0.2 : 0.8);
 
 //Edge Processing Cycles
 const int u ;
@@ -102,10 +102,30 @@ endmodule
 
 
 //energy consumption model during attacks
+rewards "incorrect"
+
+	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 1;
+	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 1;
+	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 1;
+
+endrewards
+
+//energy consumption model during attacks
 rewards "energy"
+
 	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 2.1514 * u + 4.142;
 	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 2.1514 * u + 4.142;
 	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 2.1514 * u + 4.142;
+
+endrewards
+
+
+rewards "noatenergy"
+
+	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV!=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP!=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL!=ATTACKER_PL: 2.1514 * u + 4.142;
+
 endrewards
 
 //EDGE SERVER COMPONENT
@@ -118,15 +138,16 @@ WF: [INIT_VAL..MAX_VAL]  init EMPTY;
 
 edge_loc: [1..10] init 1;
 
-[SENSOR_WL_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=2);
-[SENSOR_WL_GET]   edge_loc=2  ->  (edge_loc'=3) & (WL'=BUFFER_WL) ;
-[CLOUD_WL_SET]   edge_loc=3  ->  (edge_loc'=1);
+[SENSOR_WL_SUBSCRIBE]   edge_loc=1 & r<rounds ->  (edge_loc'=2);
+[SENSOR_WL_GET]   edge_loc=2  & r<rounds ->  (edge_loc'=3) & (WL'=BUFFER_WL) ;
+[CLOUD_WL_SET]   edge_loc=3 & r<rounds  ->  (edge_loc'=1);
 
-[SENSOR_RP_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=4);
-[SENSOR_RP_GET]   edge_loc=4  ->  (edge_loc'=5) & (RP'=BUFFER_RP) ;
-[CLOUD_RP_SET]   edge_loc=5  ->  (edge_loc'=1);
+[SENSOR_RP_SUBSCRIBE]   edge_loc=1  & r<rounds ->  (edge_loc'=4);
+[SENSOR_RP_GET]   edge_loc=4  & r<rounds ->  (edge_loc'=5) & (RP'=BUFFER_RP) ;
+[CLOUD_RP_SET]   edge_loc=5  & r<rounds ->  (edge_loc'=1);
 
-[SENSOR_WV_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=6);
-[SENSOR_WV_GET]   edge_loc=6  ->  (edge_loc'=7) & (WV'=BUFFER_WV) ;
-[CLOUD_WV_SET]   edge_loc=7  ->  (edge_loc'=1);
+[SENSOR_WV_SUBSCRIBE]   edge_loc=1 & r<rounds  ->  (edge_loc'=6);
+[SENSOR_WV_GET]   edge_loc=6 & r<rounds  ->  (edge_loc'=7) & (WV'=BUFFER_WV) ;
+[CLOUD_WV_SET]   edge_loc=7  & r<rounds ->  (edge_loc'=1);
 endmodule
+
