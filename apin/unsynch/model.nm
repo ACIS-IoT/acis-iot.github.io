@@ -1,216 +1,173 @@
+//ASYNCHRONOUS MODEL
 csg
 
-// The communication model relies on synchronized communication style
+//author: Abdelhakim Baouya
+
+const int scenario; // 0 or 1 or 2
+
+//The model evaluates the southbound bridges sensitive to attacks
+// The communication model relies on asynchronous communication style
 // The model is checked with properties file properties.pctl
 
 player p1 WLSensor endplayer
 player p2 RPSensor endplayer
 player p3 WVSensor endplayer
-player p4 CloudServer endplayer
-player p5 WFActuator endplayer
-player p6 EdgeServer endplayer
+player p4 EdgeServer endplayer
 
 //attackers
-player p7 Attacker endplayer
-
-player p8 SouthboundBufferReaderWriter endplayer
-
-player p9 NorthboundBufferReaderWriter endplayer
+player p5 Attacker endplayer
 
 
 const int EMPTY = -1;
-const int ATTACK_VAL = -1;
-const int INIT_VAL = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = -2;
 const int MAX_VAL = 3;
 
-//attaque frequency
-const double freq ;
+//Attaque frequency
+const double freq =scenario=0?0:(scenario=1 ? 0.2 : 0.8);
+
+//Edge Processing Cycles
+const int u ;
+
+const int rounds; // number of rounds
+
+module rounds
+
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
 
 //Attacker Model
 module Attacker  
   ATTACKER_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
-[ATTACK_STATUS] true -> true ;
+[SENSOR_AT_R]    r<rounds   -> true;
 
 endmodule
-
 
 //Water Level Model
 module WLSensor
   wl_pl: [INIT_VAL..MAX_VAL] init 1;
-  wl_loc: [0..3] init 0;
-
-[PRODUCE_WL]   wl_loc=0   -> (wl_loc'=1);
-[SENSOR_WL]    wl_loc=1   -> (wl_loc'=0);
-
+[SENSOR_WL_R]    r<rounds   -> true;
+[READ_WL]        r<rounds   -> true;
 endmodule
 
 
 //RP Level Model
 module RPSensor
   rp_pl: [INIT_VAL..MAX_VAL]init 1;
-  rp_loc: [0..3] init 0;
-
-[PRODUCE_RP]   rp_loc=0   -> (rp_loc'=1);
-[SENSOR_RP]    rp_loc=1   -> (rp_loc'=0);
-
+[SENSOR_RP_R]    r<rounds   -> true;
+[READ_RP]        r<rounds-> true;
 endmodule
 
 
 //WV Level Model
 module WVSensor
   wv_pl: [INIT_VAL..MAX_VAL] init 1;
-  wv_loc: [0..3] init 0;
-
-[PRODUCE_WV]   wv_loc=0   -> (wv_loc'=1);
-[SENSOR_WV]    wv_loc=1   -> (wv_loc'=0);
-
+[SENSOR_WV_R]    r<rounds   -> true;
+[READ_WV]      r<rounds   -> true;
 endmodule
 
-//WF Level Model
-module WFActuator
-  wf_pl: [INIT_VAL..MAX_VAL] init -1;
-  wf_loc: [0..3] init 0;
 
-[ACTUATOR_WF_SUBSCRIBE]    wf_loc=0 -> (wf_loc'=1);
-[ACTUATE_WF_GET] wf_loc=1 -> (wf_loc'=2)&(wf_pl'=WF);
-[ACTUATE_WF_SET] wf_loc=2 -> (wf_loc'=0);
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL
+
+ BUFFER_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_0_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_1_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ INDEX_WL   :[0..2] init 1;
+
+CN1: [1..2] init 1;
+[SENSOR_WL_R ,SENSOR_AT_R]    CN1=1  ->  (1-freq):(CN1'=2) &(BUFFER_0_WL'=(INDEX_WL=0)? wl_pl:EMPTY)&(BUFFER_1_WL'=(INDEX_WL=1)? wl_pl:EMPTY) 
+					   + freq:(CN1'=2) &(BUFFER_0_WL'=(INDEX_WL=0)? ATTACKER_PL:EMPTY)&(BUFFER_1_WL'=(INDEX_WL=1)? ATTACKER_PL:EMPTY); 
+[READ_WL,SENSOR_WL_SUBSCRIBE] CN1=2 & (BUFFER_0_WL!=EMPTY|BUFFER_1_WL!=EMPTY) -> (CN1'=1)&(BUFFER_WL'= (INDEX_WL=0)? BUFFER_0_WL:BUFFER_1_WL)&(INDEX_WL'=mod(INDEX_WL,2))
+							 &(BUFFER_0_WL'= (INDEX_WL=0)? EMPTY:BUFFER_0_WL)&(BUFFER_1_WL'= (INDEX_WL=1)? EMPTY:BUFFER_1_WL);
 endmodule
 
-rewards "correct"
-	[ACTUATE_WF_SET] wf_pl!=EMPTY: 1;
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP
+
+ BUFFER_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_0_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_1_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ INDEX_RP   :[0..2] init 1;
+
+CN12: [1..2] init 1;
+[SENSOR_RP_R ,SENSOR_AT_R]    CN12=1  ->  (1-freq):(CN12'=2) &(BUFFER_0_RP'=(INDEX_RP=0)? rp_pl:EMPTY)&(BUFFER_1_RP'=(INDEX_WL=1)? rp_pl:EMPTY) 
+					    + freq:(CN12'=2) &(BUFFER_0_RP'=(INDEX_RP=0)? ATTACKER_PL:EMPTY)&(BUFFER_1_RP'=(INDEX_RP=1)? ATTACKER_PL:EMPTY);
+[READ_RP,SENSOR_RP_SUBSCRIBE] CN12=2 & (BUFFER_0_RP!=EMPTY|BUFFER_1_RP!=EMPTY)         ->  (CN12'=1) &(BUFFER_RP'= (INDEX_RP=0)? BUFFER_0_RP:BUFFER_1_RP)&(INDEX_RP'=mod(INDEX_RP,2))
+							 &(BUFFER_0_RP'= (INDEX_RP=0)? EMPTY:BUFFER_0_RP)&(BUFFER_1_RP'= (INDEX_RP=1)? EMPTY:BUFFER_1_RP);
+endmodule
+
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV
+
+ BUFFER_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_0_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_1_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ INDEX_WV   :[0..2] init 1;
+
+CN13: [1..2] init 1;
+[SENSOR_WV_R ,SENSOR_AT_R]    CN13=1  ->  (1-freq):(CN13'=2) &(BUFFER_0_WV'=(INDEX_WV=0)? wv_pl:EMPTY)&(BUFFER_1_WV'=(INDEX_WL=1)? wv_pl:EMPTY) 
+					    + freq:(CN13'=2) &(BUFFER_0_WV'=(INDEX_WV=0)? ATTACKER_PL:EMPTY)&(BUFFER_1_WV'=(INDEX_WV=1)? ATTACKER_PL:EMPTY);
+[READ_WV,SENSOR_WV_SUBSCRIBE] CN13=2       & (BUFFER_0_WV!=EMPTY|BUFFER_1_WV!=EMPTY)         ->  (CN13'=1) &(BUFFER_WV'= (INDEX_WV=0)? BUFFER_0_WV:BUFFER_1_WV)&(INDEX_WV'=mod(INDEX_WV,2))
+							 &(BUFFER_0_WV'= (INDEX_WV=0)? EMPTY:BUFFER_0_WV)&(BUFFER_1_WV'= (INDEX_WV=1)? EMPTY:BUFFER_1_WV);
+endmodule
+
+
+
+//energy consumption model during attacks
+rewards "incorrect"
+
+	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 1;
+	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 1;
+	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 1;
+
+endrewards
+
+//energy consumption model during attacks
+rewards "energy"
+
+	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 2.1514 * u + 4.142;
+
 endrewards
 
 
-//BufferWriter Level Model
-module SouthboundBufferReaderWriter
- sw: [INIT_VAL..MAX_VAL] init 0;
- sr: [INIT_VAL..MAX_VAL] init 0;
+rewards "noatenergy"
 
-[SW_0]   sw=0 -> (sw'=1);
-[SW_1]   sw=1 -> (sw'=2);
-[SW_2]   sw=2 -> (sw'=0);
+	[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV!=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP!=ATTACKER_PL: 2.1514 * u + 4.142;
+	[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL!=ATTACKER_PL: 2.1514 * u + 4.142;
 
-[SR_0]   sr=0 -> (sr'=1);
-[SR_1]   sr=1 -> (sr'=2);
-[SR_2]   sr=2 -> (sr'=0);
-endmodule
-
-
-//SouthBoundBridge COMPONENT
-module SouthBoundEdgeBridge
-BUFFER_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
-
-BUFFER_0_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_0_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_0_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
-
-BUFFER_1_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_1_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_1_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
-
-CN1: [1..2] init 1;
-
-//inputs to the edge
-[SENSOR_WL , ATTACK_STATUS, SW_0]    CN1=1  ->  (CN1'=1) & (BUFFER_0_WL'= (BUFFER_0_WL!=EMPTY)?BUFFER_0_WL:wl_pl)& (BUFFER_1_WL'= (BUFFER_1_WL!=EMPTY)?BUFFER_1_WL:wl_pl);
-
-[SENSOR_RP , ATTACK_STATUS, SW_1]    CN1=1  ->  (CN1'=1) & (BUFFER_0_RP'= (BUFFER_0_RP!=EMPTY)?BUFFER_0_RP:rp_pl)& (BUFFER_1_RP'= (BUFFER_1_RP!=EMPTY)?BUFFER_1_RP:rp_pl);
-
-[SENSOR_WV , ATTACK_STATUS, SW_2]    CN1=1  ->  (CN1'=1) & (BUFFER_0_WV'= (BUFFER_0_WV!=EMPTY)?BUFFER_0_WV:wv_pl)& (BUFFER_1_WV'= (BUFFER_1_WV!=EMPTY)?BUFFER_1_WV:wv_pl);
-
-[SENSOR_WL_SUBSCRIBE, SR_0]    CN1=1  ->   (1-freq):(CN1'=1) & (BUFFER_WL'=(BUFFER_0_WL!=EMPTY)?BUFFER_0_WL:BUFFER_1_WL)+  freq:(BUFFER_WL'=ATTACKER_PL);
-  
-[SENSOR_RP_SUBSCRIBE, SR_1]    CN1=1  ->   (1-freq):(CN1'=1) & (BUFFER_RP'=(BUFFER_0_RP!=EMPTY)?BUFFER_0_RP:BUFFER_1_RP)+  freq:(BUFFER_WL'=ATTACKER_PL);
-
-[SENSOR_WV_SUBSCRIBE, SR_2]    CN1=1  ->   (1-freq):(CN1'=1) & (BUFFER_WV'=(BUFFER_0_WV!=EMPTY)?BUFFER_0_WV:BUFFER_1_WV)+  freq:(BUFFER_WL'=ATTACKER_PL);
-
-
-//outputs to the actuator
-[ACTUATOR_WF_SUBSCRIBE , ACTUATOR_WF_SET]    CN1=1  -> (CN1'=1)& (BUFFER_0_WL'=EMPTY)& 
-								 (BUFFER_0_RP'=EMPTY)&
-                                                                 (BUFFER_0_WV'=EMPTY)&
-                                                                 (BUFFER_1_WL'=EMPTY)& (BUFFER_1_RP'=EMPTY)& (BUFFER_1_WV'=EMPTY);
-endmodule
-
-
+endrewards
 
 //EDGE SERVER COMPONENT
 module EdgeServer
 
-WL: [INIT_VAL..MAX_VAL]  init -1;
-RP: [INIT_VAL..MAX_VAL]  init -1;
-WV: [INIT_VAL..MAX_VAL]  init -1;
-WF: [INIT_VAL..MAX_VAL]  init -1;
+WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+WF: [INIT_VAL..MAX_VAL]  init EMPTY;
 
 edge_loc: [1..10] init 1;
 
-[SENSOR_WL_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=2);
-[SENSOR_WL_GET]   edge_loc=2  ->  (edge_loc'=3) & (WL'=BUFFER_WL) ;
-[CLOUD_WL_SET]   edge_loc=3  ->  (edge_loc'=1);
+[SENSOR_WL_SUBSCRIBE]   edge_loc=1 & r<rounds ->  (edge_loc'=2);
+[SENSOR_WL_GET]   edge_loc=2  & r<rounds ->  (edge_loc'=3) & (WL'=BUFFER_WL) ;
+[CLOUD_WL_SET]   edge_loc=3 & r<rounds  ->  (edge_loc'=1);
 
-[SENSOR_RP_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=4);
-[SENSOR_RP_GET]   edge_loc=4  ->  (edge_loc'=5) & (RP'=BUFFER_RP) ;
-[CLOUD_RP_SET]   edge_loc=5  ->  (edge_loc'=1);
+[SENSOR_RP_SUBSCRIBE]   edge_loc=1  & r<rounds ->  (edge_loc'=4);
+[SENSOR_RP_GET]   edge_loc=4  & r<rounds ->  (edge_loc'=5) & (RP'=BUFFER_RP) ;
+[CLOUD_RP_SET]   edge_loc=5  & r<rounds ->  (edge_loc'=1);
 
-[SENSOR_WV_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=6);
-[SENSOR_WV_GET]   edge_loc=6  ->  (edge_loc'=7) & (WV'=BUFFER_WV) ;
-[CLOUD_WV_SET]   edge_loc=7  ->  (edge_loc'=1);
-
-[CLOUD_WF_SUBSCRIBE]   edge_loc=1  ->  (edge_loc'=8);
-[CLOUD_WF_GET]   edge_loc=8  ->  (edge_loc'=9) & (WF'=BUFFER_WF) ;
-[ACTUATOR_WF_SET]   edge_loc=9  ->  (edge_loc'=1);
-
-
-endmodule
-
-//BufferWriter Level Model
-module NorthboundBufferReaderWriter
- nw: [INIT_VAL..MAX_VAL] init 0;
- nr: [INIT_VAL..MAX_VAL] init 0;
-
-[NW_0]   nw=0 -> (nw'=0);
-
-[NR_0]   nr=0 -> (nr'=0);
-endmodule
-
-//NorthBoundBridge COMPONENT
-module NorthBoundEdgeBridge
-
-BUFFER_WF: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_0_WF: [INIT_VAL..MAX_VAL]  init EMPTY;
-BUFFER_1_WF: [INIT_VAL..MAX_VAL]  init EMPTY;
-
-CN2: [1..2] init 1;
-
-
-[CLOUD_WF  , ATTACK_STATUS,  NW_0]    CN2=1  ->  (CN2'=1) & (BUFFER_0_WF'=(BUFFER_0_WF!=EMPTY)?BUFFER_0_WF:cloud_wf)& (BUFFER_1_WF'=(BUFFER_1_WF!=EMPTY)?BUFFER_1_WF:cloud_wf)    ;
-
-[CLOUD_WF_SUBSCRIBE,         NR_0]    CN2=1  ->  (1-freq): (CN2'=1) & (BUFFER_WF'= (BUFFER_0_WF!=EMPTY)?BUFFER_0_WF:BUFFER_1_WF)   +  freq:(BUFFER_WF'=ATTACKER_PL);
-
-//outputs of the edge
-[CLOUD_WL_SET_RECEIVE , CLOUD_WL_SET]    CN2=1  -> (CN2'=1);
-[CLOUD_WV_SET_RECEIVE , CLOUD_WV_SET]    CN2=1  -> (CN2'=1);
-[CLOUD_RP_SET_RECEIVE , CLOUD_RP_SET]    CN2=1  -> (CN2'=1);
-
+[SENSOR_WV_SUBSCRIBE]   edge_loc=1 & r<rounds  ->  (edge_loc'=6);
+[SENSOR_WV_GET]   edge_loc=6 & r<rounds  ->  (edge_loc'=7) & (WV'=BUFFER_WV) ;
+[CLOUD_WV_SET]   edge_loc=7  & r<rounds ->  (edge_loc'=1);
 endmodule
 
 
-//CLOUD SERVER COMPONENT
-
-module CloudServer
-  cloud_wv: [INIT_VAL..MAX_VAL] init EMPTY;
-  cloud_wl: [INIT_VAL..MAX_VAL] init EMPTY;
-  cloud_rp: [INIT_VAL..MAX_VAL] init EMPTY;
-  cloud_wf: [INIT_VAL..MAX_VAL] init EMPTY;
-  cloud_loc: [0..3] init 0;
-
-[CLOUD_WL_SET_RECEIVE]   cloud_loc=0   -> (cloud_loc'=0)&(cloud_wl'=WL);
-[CLOUD_RP_SET_RECEIVE]   cloud_loc=0   -> (cloud_loc'=0)&(cloud_rp'=RP);
-[CLOUD_WV_SET_RECEIVE]   cloud_loc=0   -> (cloud_loc'=0)&(cloud_wv'=WV);
-
-[PROCESS]   cloud_loc=0 & (cloud_wl!=EMPTY)& (cloud_rp!=EMPTY) & (cloud_wv!=EMPTY)  -> (cloud_loc'=1)&(cloud_wf'=1);
-
-[CLOUD_WF]  cloud_loc=1   -> (cloud_loc'=0)&(cloud_wf'=EMPTY);
-
-endmodule
