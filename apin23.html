@@ -20,6 +20,23 @@
   border-radius: 5px;
   box-shadow: 1px 2px 3px 4px rgba(12,12,12,0.2);
 }
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+        
     </style>
 </head>
 <body>
@@ -42,6 +59,19 @@ In <em> Journal Applied Intelligence, Springer </em>, 2023 (Submitted).
 <ul>
   <li>  PRISM models </li> 
 <ul>
+  <table>
+  <tr>
+    <th>Description</th>
+    <th>Model</th>
+    <th>rPATL properties</th>
+  </tr>
+  <tr>
+    <td>Example of simple CSG game where two players are producer and consumer</td>
+    <td> <a href="apin/example/model.nm">[Link]</a> </td>
+    <td><a href="apin/example/properties.pctl">[Link]</a>  </td>
+  </tr>
+</table>
+  
   <li> [Example] Example of simple CSG game where two players are producer and consumer:  <a href="apin/example/model.nm">[Link]</a> with rPATL properties <a href="apin/example/properties.pctl">[Link]</a>  </li>
   <li> [M1] Model of Sensor-Edge-Cloud Architecture:  <a href="apin/example/model.nm">[Link]</li>
   <li> [M2] Model of Sensor-Edge-Cloud Architecture with attackers implementing Synchronous Mode <a href="apin/synchro/model.nm">[Link]</a> with PCTL properties <a href="apin/synchro/properties.pctl">[Link]</a>  </li>
