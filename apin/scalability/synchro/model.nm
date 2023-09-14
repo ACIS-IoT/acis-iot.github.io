@@ -1,9 +1,12 @@
+//ASYNCHRONOUS MODEL
 csg
-//scalability with three attackers
+
+//author: Abdelhakim Baouya
+
 const int scenario; // 0 or 1 or 2
 
 //The model evaluates the southbound bridges sensitive to attacks
-// The communication model relies on synchronized communication style
+// The communication model relies on asynchronous communication style
 // The model is checked with properties file properties.pctl
 
 player p1 WLSensor endplayer
@@ -11,7 +14,7 @@ player p2 RPSensor endplayer
 player p3 WVSensor endplayer
 player p4 EdgeServer endplayer
 
-//attacker
+//attackers
 player p5 Attacker1 endplayer
 player p6 Attacker2 endplayer
 player p7 Attacker3 endplayer
@@ -43,23 +46,19 @@ endmodule
 module Attacker1  
   ATTACKER1_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
 [SENSOR_AT1_R]    r<rounds   -> true;
-
 endmodule
 
 //Attacker Model
-module Attacker2 
+module Attacker2  
   ATTACKER2_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
 [SENSOR_AT2_R]    r<rounds   -> true;
-
 endmodule
 
 //Attacker Model
-module Attacker3  
+module Attacker3 
   ATTACKER3_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
 [SENSOR_AT3_R]    r<rounds   -> true;
-
 endmodule
-
 
 //Water Level Model
 module WLSensor
@@ -90,33 +89,60 @@ endmodule
 module SouthBoundEdgeBridgeWL
 
  BUFFER_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_0_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_1_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ INDEX_WL   :[0..2] init 1;
 
 CN1: [1..2] init 1;
-[SENSOR_WL_R ,SENSOR_AT1_R,SENSOR_AT2_R,SENSOR_AT3_R]    CN1=1  ->  (1-freq):(CN1'=2) &(BUFFER_WL'= wl_pl) + (freq/3):(CN1'=2) & (BUFFER_WL'=ATTACKER1_PL)+ (freq/3):(CN1'=2) & (BUFFER_WL'=ATTACKER2_PL) + (freq/3):(CN1'=2) & (BUFFER_WL'=ATTACKER3_PL)    ;
-[READ_WL,SENSOR_WL_SUBSCRIBE] CN1=2 & BUFFER_WL!=EMPTY -> (CN1'=1)&(BUFFER_WL'= EMPTY);
+[SENSOR_WL_R ,SENSOR_AT1_R,SENSOR_AT2_R,SENSOR_AT3_R]    CN1=1  ->  (1-freq):(CN1'=2) &(BUFFER_0_WL'=(INDEX_WL=0)? wl_pl:EMPTY)&(BUFFER_1_WL'=(INDEX_WL=1)? wl_pl:EMPTY) 
+					   + freq/3:(CN1'=2) &(BUFFER_0_WL'=(INDEX_WL=0)? ATTACKER1_PL:EMPTY)&(BUFFER_1_WL'=(INDEX_WL=1)? ATTACKER1_PL:EMPTY)
+ 					   + freq/3:(CN1'=2) &(BUFFER_0_WL'=(INDEX_WL=0)? ATTACKER2_PL:EMPTY)&(BUFFER_1_WL'=(INDEX_WL=1)? ATTACKER2_PL:EMPTY)
+				           + freq/3:(CN1'=2) &(BUFFER_0_WL'=(INDEX_WL=0)? ATTACKER3_PL:EMPTY)&(BUFFER_1_WL'=(INDEX_WL=1)? ATTACKER3_PL:EMPTY)
+
+
+
+; 
+[READ_WL,SENSOR_WL_SUBSCRIBE] CN1=2 & (BUFFER_0_WL!=EMPTY|BUFFER_1_WL!=EMPTY) -> (CN1'=1)&(BUFFER_WL'= (INDEX_WL=0)? BUFFER_0_WL:BUFFER_1_WL)&(INDEX_WL'=mod(INDEX_WL,2))
+							 &(BUFFER_0_WL'= (INDEX_WL=0)? EMPTY:BUFFER_0_WL)&(BUFFER_1_WL'= (INDEX_WL=1)? EMPTY:BUFFER_1_WL);
 endmodule
 
 //SouthBoundBridge Connector Rain Precipitation
 module SouthBoundEdgeBridgeRP
 
  BUFFER_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_0_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_1_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ INDEX_RP   :[0..2] init 1;
 
 CN12: [1..2] init 1;
-[SENSOR_RP_R ,SENSOR_AT1_R,SENSOR_AT2_R,SENSOR_AT3_R]    CN12=1  ->  (1-freq):(CN12'=2) &(BUFFER_RP'= rp_pl) + freq/3:(CN12'=2) & (BUFFER_RP'=ATTACKER1_PL)+ freq/3:(CN12'=2) & (BUFFER_RP'=ATTACKER2_PL)+ freq/3:(CN12'=2) & (BUFFER_RP'=ATTACKER3_PL)   ;
-[READ_RP,SENSOR_RP_SUBSCRIBE] CN12=2        & BUFFER_RP!=EMPTY          ->  (CN12'=1) &(BUFFER_RP'= EMPTY);
+[SENSOR_RP_R ,SENSOR_AT1_R,SENSOR_AT2_R,SENSOR_AT3_R]    CN12=1  ->  (1-freq):(CN12'=2) &(BUFFER_0_RP'=(INDEX_RP=0)? rp_pl:EMPTY)&(BUFFER_1_RP'=(INDEX_WL=1)? rp_pl:EMPTY) 
+					    + freq/3:(CN12'=2) &(BUFFER_0_RP'=(INDEX_RP=0)? ATTACKER1_PL:EMPTY)&(BUFFER_1_RP'=(INDEX_RP=1)? ATTACKER1_PL:EMPTY)
+ 					    + freq/3:(CN12'=2) &(BUFFER_0_RP'=(INDEX_RP=0)? ATTACKER2_PL:EMPTY)&(BUFFER_1_RP'=(INDEX_RP=1)? ATTACKER2_PL:EMPTY)
+  					    + freq/3:(CN12'=2) &(BUFFER_0_RP'=(INDEX_RP=0)? ATTACKER3_PL:EMPTY)&(BUFFER_1_RP'=(INDEX_RP=1)? ATTACKER3_PL:EMPTY);
+
+
+[READ_RP,SENSOR_RP_SUBSCRIBE] CN12=2 & (BUFFER_0_RP!=EMPTY|BUFFER_1_RP!=EMPTY)         ->  (CN12'=1) &(BUFFER_RP'= (INDEX_RP=0)? BUFFER_0_RP:BUFFER_1_RP)&(INDEX_RP'=mod(INDEX_RP,2))
+							 &(BUFFER_0_RP'= (INDEX_RP=0)? EMPTY:BUFFER_0_RP)&(BUFFER_1_RP'= (INDEX_RP=1)? EMPTY:BUFFER_1_RP);
 endmodule
 
 //SouthBoundBridge Connector Water Volume
 module SouthBoundEdgeBridgeWV
 
  BUFFER_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_0_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ BUFFER_1_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ INDEX_WV   :[0..2] init 1;
+
 CN13: [1..2] init 1;
-[SENSOR_WV_R ,SENSOR_AT1_R,SENSOR_AT2_R,SENSOR_AT3_R]    CN13=1  ->  (1-freq):(CN13'=2) &(BUFFER_WV'= rp_pl) + freq/3:(CN13'=2) & (BUFFER_WV'=ATTACKER1_PL)+ freq/3:(CN13'=2) & (BUFFER_WV'=ATTACKER2_PL)+ freq/3:(CN13'=2) & (BUFFER_WV'=ATTACKER3_PL)   ;
-[READ_WV,SENSOR_WV_SUBSCRIBE] CN13=2        & BUFFER_WV!=EMPTY                      ->  (CN13'=1) &(BUFFER_WV'= EMPTY);
+[SENSOR_WV_R ,SENSOR_AT1_R,SENSOR_AT2_R,SENSOR_AT3_R]    CN13=1  ->  (1-freq):(CN13'=2) &(BUFFER_0_WV'=(INDEX_WV=0)? wv_pl:EMPTY)&(BUFFER_1_WV'=(INDEX_WL=1)? wv_pl:EMPTY) 
+					    + freq/3:(CN13'=2) &(BUFFER_0_WV'=(INDEX_WV=0)? ATTACKER1_PL:EMPTY)&(BUFFER_1_WV'=(INDEX_WV=1)? ATTACKER1_PL:EMPTY)
+   					    + freq/3:(CN13'=2) &(BUFFER_0_WV'=(INDEX_WV=0)? ATTACKER2_PL:EMPTY)&(BUFFER_1_WV'=(INDEX_WV=1)? ATTACKER2_PL:EMPTY)
+                                            + freq/3:(CN13'=2) &(BUFFER_0_WV'=(INDEX_WV=0)? ATTACKER3_PL:EMPTY)&(BUFFER_1_WV'=(INDEX_WV=1)? ATTACKER3_PL:EMPTY);
+
+
+[READ_WV,SENSOR_WV_SUBSCRIBE] CN13=2       & (BUFFER_0_WV!=EMPTY|BUFFER_1_WV!=EMPTY)         ->  (CN13'=1) &(BUFFER_WV'= (INDEX_WV=0)? BUFFER_0_WV:BUFFER_1_WV)&(INDEX_WV'=mod(INDEX_WV,2))
+							 &(BUFFER_0_WV'= (INDEX_WV=0)? EMPTY:BUFFER_0_WV)&(BUFFER_1_WV'= (INDEX_WV=1)? EMPTY:BUFFER_1_WV);
 endmodule
-
-
-
 //energy consumption model during attacks
 rewards "incorrect"
 
@@ -125,7 +151,6 @@ rewards "incorrect"
 	[READ_WL,SENSOR_WL_SUBSCRIBE] (BUFFER_WL=ATTACKER1_PL|BUFFER_WL=ATTACKER2_PL|BUFFER_WL=ATTACKER3_PL): 1;
 
 endrewards
-
 
 //EDGE SERVER COMPONENT
 module EdgeServer
