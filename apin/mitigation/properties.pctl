@@ -1,0 +1,4 @@
+const int T;
+const int M;
+
+<<p1,p2,p3,p4,p5,p6>>R{"incorrect"}max=? [ F r=rounds ]
