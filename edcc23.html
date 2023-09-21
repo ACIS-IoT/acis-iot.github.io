@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EDCC2023</title>
+      <style type="text/css">
+
+.container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Actual card with shadow */
+.card {
+  height: 200px;
+  width: 200px;
+  border-radius: 5px;
+  box-shadow: 1px 2px 3px 4px rgba(12,12,12,0.2);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  text-align: left;
+  padding: 8px;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+        
+    </style>
+</head>
+<body>
+
+  
+<div class="prism-citebox">
+<div class="prism-citeboxheader">
+
+<h1 style="color:green;font-size:18px;">EDCC2023:</h1>
+</div>
+<ul><li>
+Abdelhakim Baouya, Brahim Hamid, Levent Gürgen, and Saddek Bensalem
+<font color= red>Assessing Security Risks in the RabbitMQ Protocol for Edge Servers through Concurrent Stochastic Games</font>.
+In <em> IEEE EDCC </em>, 2023 (Submitted).
+
+  
+<br /><p align="justify"><u>Abstract</u>: <em> Modern Internet of Things (IoT) architectures encompass a wide array of computational logic and communication protocols. However, the security vulnerabilities inherent in these systems pose significant risks. It is imperative to address these threats in designing communication protocols to ensure robust and secure communication system. In this study, we propose an approach that utilizes the Concurrent Stochastic Game model to precisely specify the behavior of IoT communication entities, referred to as players, while considering potential data corruption attacks at the communication edge. We implement the RabbitMQ communication protocol in the PRISM-games language for automated analysis, leveraging reward Probabilistic Alternating Temporal Logic (rPATL) to model functional and security requirements as game goals. Through this assessment, we gain valuable insights into the protocol's feasibility in relation to the existing implementation of the Sensinact edge gateway. To validate our approach, we investigate a data corruption attack targeting sensed data and examine its impact on payload routing and message loss for water dam infrastructure. .</em></p> 
+
+<h1 style="color:green;font-size:14px;">Developed Artefacts</h1>
+
+  <table>
+  <tr>
+    <th>PRISM-games Model Description</th>
+    <th>Model</th>
+    <th>rPATL properties</th>
+  </tr>
+  <tr>
+    <td>Example of simple CSG game where two players are producer and consumer</td>
+    <td> <a href="apin/example/model.nm">[Download]</a> </td>
+    <td><a href="apin/example/properties.pctl">[Download]</a>  </td>
+  </tr>
+
+    <tr>
+    <td>Example of RabbitMQ CSG game with one sensor and one consumer</td>
+    <td> <a href="edcc/norpc/model.nm">[Download]</a> </td>
+    <td><a href="edcc/norpc/properties.pctl">[Download]</a>  </td>
+  </tr>
+    
+    
+</table>
+
+
+
+
+</li>
+</ul>
+</div>
+  
+
+
+
+
+
+<footer><em>This page developed  for CNRS ACIS-IoT project.</em></footer>
+<footer><em>contact:abaouya@acm.org</em></footer>
+
+</body>
