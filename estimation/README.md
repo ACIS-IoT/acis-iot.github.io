@@ -33,5 +33,5 @@ The estimated rate parameter using Maximum Likelihood Estimation (MLE) with the 
 
 The estimated rate parameter using MLE with the Nelder-Mead solver is 0.13486328124999925.
 
-Feel free to modify the command or explore the code further to suit your needs. If you have any questions or need assistance, please let me know!
+To reuse the contact please contact me
 
