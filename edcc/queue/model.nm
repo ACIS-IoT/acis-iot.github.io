@@ -174,7 +174,7 @@ endmodule
 formula Queue_WV_FILLED=  i_KEY_WV>0;
 
 
-rewards "damage"
+rewards "empty"
 	[exchange_KEY_WL, enqueue_KEY_WL] b_0_KEY_WL=EMPTY | b_1_KEY_WL=EMPTY : 0.5;
 	[exchange_KEY_RP, enqueue_KEY_RP] b_0_KEY_RP=EMPTY | b_1_KEY_RP=EMPTY : 0.5;
 	[exchange_KEY_WV, enqueue_KEY_WV] b_0_KEY_WV=EMPTY | b_1_KEY_WV=EMPTY : 0.5;
