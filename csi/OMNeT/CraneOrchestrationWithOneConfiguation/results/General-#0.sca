@@ -1,8 +1,8 @@
 version 3
-run General-0-20231107-13:12:30-156389
+run General-0-20231107-17:34:27-106944
 attr configname General
-attr datetime 20231107-13:12:30
-attr datetimef 20231107-131230
+attr datetime 20231107-17:34:27
+attr datetimef 20231107-173427
 attr experiment General
 attr inifile omnetpp.ini
 attr iterationvars ""
@@ -10,7 +10,7 @@ attr iterationvarsd ""
 attr iterationvarsf ""
 attr measurement ""
 attr network CranesOrchestration
-attr processid 156389
+attr processid 106944
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -61,9 +61,9 @@ par CranesOrchestration.Drone1.CRANE_LIFT.channel delay 0.1s
 attr mutable ""
 attr unit s
 par CranesOrchestration.Drone0 typename "\"Drone\""
-par CranesOrchestration.Drone0 driftRate 0.046
+par CranesOrchestration.Drone0 driftRate 0.049
 par CranesOrchestration.Drone1 typename "\"Drone\""
-par CranesOrchestration.Drone1 driftRate 0.048
+par CranesOrchestration.Drone1 driftRate 0.049
 par CranesOrchestration.Gateway typename "\"InBox\""
 par CranesOrchestration.Crane0 typename "\"Crane\""
 par CranesOrchestration.Crane1 typename "\"Crane\""
