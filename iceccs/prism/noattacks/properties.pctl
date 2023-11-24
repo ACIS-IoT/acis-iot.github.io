@@ -1,0 +1,6 @@
+const int T;
+
+Pmin=? [ (RP=1&WV=1&WL=1)=>(true U (WF=1)) ]
+
+Pmax=? [ (RP=1&WV=1&WL=1)=>(true U (WF=1)) ]
+
