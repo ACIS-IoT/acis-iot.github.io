@@ -1,0 +1,128 @@
+dtmc
+ 
+const int WV_BK =1;
+const int RP_BK =2;
+const int WL_BK =3;
+const int WF_BK =4;
+const int MAX =2;
+
+const int AT =0;
+
+const double ATFRQ;
+const double FRQ= 1-ATFRQ;
+
+module Sesnor_WV
+WV : [0..1] init 1 ;
+
+WV_RK:  [0..4] init 1 ;
+
+endmodule
+
+
+module Sesnor_RP
+RP : [0..1] init 1 ;
+
+RP_RK:  [0..4] init 2 ;
+
+endmodule
+
+module Sesnor_WL
+WL : [0..1] init 1 ;
+
+WL_RK:  [0..4] init 3 ;
+
+endmodule
+
+module Actuator_WF
+WF : [-1..1] init -1 ;
+
+done: bool init false;
+
+[WF_ITEM_0] FIFO_WF_ITEM_0!=-1 & !done -> (WF'=FIFO_WF_ITEM_0)&(done'=true);
+
+[ ] WF!=-1 & done-> (WF'=-1)&(done'=false);
+
+[WF_ITEM_1] FIFO_WF_ITEM_1!=-1 & !done -> (WF'=FIFO_WF_ITEM_1)&(done'=true);
+endmodule
+
+
+module exchange
+
+FIFO_WV_ITEM_0 : [-1..1] init -1 ;
+FIFO_WV_ITEM_1 : [-1..1] init -1 ;
+FIFO_WV_SIZE: [0..2] init 0;
+
+FIFO_RP_ITEM_0 : [-1..1] init -1 ;
+FIFO_RP_ITEM_1 : [-1..1] init -1 ;
+FIFO_RP_SIZE: [0..2] init 0;
+
+FIFO_WL_ITEM_0 : [-1..1] init -1 ;
+FIFO_WL_ITEM_1 : [-1..1] init -1 ;
+FIFO_WL_SIZE: [0..2] init 0;
+
+FIFO_WF_ITEM_0 : [-1..1] init -1 ;
+FIFO_WF_ITEM_1 : [-1..1] init -1 ;
+FIFO_WF_SIZE: [0..2] init 0;
+
+COLLECT_WF : [0..1] init 0 ;
+
+[PWV] (WV_RK=WV_BK) & FIFO_WV_SIZE<MAX->  FRQ:(FIFO_WV_ITEM_0'=FIFO_WV_SIZE=0?1:FIFO_WV_ITEM_0) & (FIFO_WV_ITEM_1'=FIFO_WV_SIZE=1?1:FIFO_WV_ITEM_1) & (FIFO_WV_SIZE'=mod(FIFO_WV_SIZE+1,2))
+				     +(1-FRQ):(FIFO_WV_ITEM_0'=FIFO_WV_SIZE=0?AT:FIFO_WV_ITEM_0) & (FIFO_WV_ITEM_1'=FIFO_WV_SIZE=1?AT:FIFO_WV_ITEM_1) & (FIFO_WV_SIZE'=mod(FIFO_WV_SIZE+1,2));
+
+[PRP] (RP_RK=RP_BK) & FIFO_RP_SIZE<MAX->  FRQ:(FIFO_RP_ITEM_0'=FIFO_RP_SIZE=0?1:FIFO_RP_ITEM_0) & (FIFO_RP_ITEM_1'=FIFO_RP_SIZE=1?1:FIFO_RP_ITEM_1) & (FIFO_RP_SIZE'=mod(FIFO_RP_SIZE+1,2))
+				     +(1-FRQ):(FIFO_RP_ITEM_0'=FIFO_RP_SIZE=0?AT:FIFO_RP_ITEM_0) & (FIFO_RP_ITEM_1'=FIFO_RP_SIZE=1?AT:FIFO_RP_ITEM_1) & (FIFO_RP_SIZE'=mod(FIFO_RP_SIZE+1,2));
+
+[PWF] (WF_RK=WF_BK) & FIFO_WF_SIZE<MAX->  FRQ:(FIFO_WF_ITEM_0'=FIFO_WF_SIZE=0?1:FIFO_WF_ITEM_0) & (FIFO_WF_ITEM_1'=FIFO_WF_SIZE=1?1:FIFO_WF_ITEM_1) & (FIFO_WF_SIZE'=mod(FIFO_WF_SIZE+1,2))
+				     +(1-FRQ):(FIFO_WF_ITEM_0'=FIFO_WF_SIZE=0?AT:FIFO_WF_ITEM_0) & (FIFO_WF_ITEM_1'=FIFO_WF_SIZE=1?AT:FIFO_WF_ITEM_1) & (FIFO_WF_SIZE'=mod(FIFO_WF_SIZE+1,2));
+
+[PWL] (WL_RK=WL_BK) & FIFO_WL_SIZE<MAX->  FRQ:(FIFO_WL_ITEM_0'=FIFO_WL_SIZE=0?1:FIFO_WL_ITEM_0) & (FIFO_WL_ITEM_1'=FIFO_WL_SIZE=1?1:FIFO_WL_ITEM_1) & (FIFO_WL_SIZE'=mod(FIFO_WL_SIZE+1,2))
+				     +(1-FRQ):(FIFO_WL_ITEM_0'=FIFO_WL_SIZE=0?AT:FIFO_WL_ITEM_0) & (FIFO_WL_ITEM_1'=FIFO_WL_SIZE=1?AT:FIFO_WL_ITEM_1) & (FIFO_WL_SIZE'=mod(FIFO_WL_SIZE+1,2));
+
+[CRPWLWV_ITEM_0] FIFO_WV_SIZE>0 & FIFO_RP_SIZE>0  & FIFO_WL_SIZE>0  -> 
+	    	  (FIFO_WV_ITEM_0'=-1)   &  (FIFO_WL_ITEM_0'=-1) & (FIFO_RP_ITEM_0'=-1) 
+		& (FIFO_WL_SIZE'=FIFO_WL_SIZE-1)
+	  	& (FIFO_RP_SIZE'=FIFO_RP_SIZE-1)   
+		& (FIFO_WV_SIZE'=FIFO_WV_SIZE-1); 
+
+[CRPWLWV_ITEM_1] FIFO_WV_SIZE>0 & FIFO_RP_SIZE>0  & FIFO_WL_SIZE>0  -> 
+	    	  (FIFO_WV_ITEM_1'=-1)   &  (FIFO_WL_ITEM_1'=-1) & (FIFO_RP_ITEM_1'=-1) 
+		& (FIFO_WL_SIZE'=FIFO_WL_SIZE-1)
+	  	& (FIFO_RP_SIZE'=FIFO_RP_SIZE-1)   
+		& (FIFO_WV_SIZE'=FIFO_WV_SIZE-1);
+
+[WF_ITEM_0] FIFO_WF_SIZE>0 & (COLLECT_WF=0) -> (FIFO_WF_ITEM_0'=-1) & (FIFO_WF_SIZE'=FIFO_WF_SIZE-1) & (COLLECT_WF'=1); 
+
+[WF_ITEM_1] FIFO_WF_SIZE>0 & (COLLECT_WF=1) -> (FIFO_WF_ITEM_1'=-1) & (FIFO_WF_SIZE'=FIFO_WF_SIZE-1) & (COLLECT_WF'=0); 
+
+endmodule
+
+
+
+
+
+
+module FOG_WF
+
+CWF : [0..1] init 0 ;
+
+WF_RK:  [0..4] init 4 ;
+
+CWV : [-1..1] init -1 ;
+CWL : [-1..1] init -1 ;
+CRP : [-1..1] init -1 ;
+
+COLLECT : [0..1] init 0 ;
+
+[CRPWLWV_ITEM_0] FIFO_WV_ITEM_0!=-1 &  FIFO_WL_ITEM_0 !=-1 & FIFO_RP_ITEM_0!=-1 & (COLLECT=0)-> (CWV'=FIFO_WV_ITEM_0)& (CWL'=FIFO_WL_ITEM_0) & (CRP'=FIFO_RP_ITEM_0) & (COLLECT'=1);
+
+[CRPWLWV_ITEM_1] FIFO_WV_ITEM_1!=-1 &  FIFO_WL_ITEM_1 !=-1 & FIFO_RP_ITEM_1!=-1 & (COLLECT=1) -> (CWV'=FIFO_WV_ITEM_1)& (CWL'=FIFO_WL_ITEM_1) & (CRP'=FIFO_RP_ITEM_1) & (COLLECT'=0);
+
+[PWF] CWV!=-1 & CWL!=-1 &  CRP!=-1-> (CWV'=-1)& (CWL'=-1)& (CRP'=-1); 
+
+endmodule
+
+
+
+label "ready" = (WF=-1);
+
+label "correct" = (WF=1);
