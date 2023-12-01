@@ -1,0 +1,18 @@
+dtmc
+
+const int AT;
+module GeneratedDecisiontree
+RP : [0..1] init 1 ;
+WV : [0..1] init 1 ;
+WL : [0..1] init 1 ;
+WF : [-1..1] init -1 ;
+done : [0..1] init 1 ;
+[rule1] RP=1 & WV=1 & WL=1 & AT=0 & (done=1)-> 0.16706586826347307:(WF'=0)  & (done'=0) + 0.8329341317365269:(WF'=1)  & (done'=0);
+[rule2] RP=1 & WV=1 & WL=1 & AT=1 & (done=1)-> 0.8450901803607214:(WF'=0)  & (done'=0) + 0.15490981963927857:(WF'=1)  & (done'=0);
+endmodule
+
+
+
+label "ready" = (WF=-1);
+
+label "correct" = (WF=1);

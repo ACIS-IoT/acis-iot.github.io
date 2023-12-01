@@ -12,13 +12,35 @@ import BayesianNetwork
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
 
+# Generate values for AT and WF
+# AT_values = np.random.randint(0, 2, size=1000)  # Generate 100 random values of 0 or 1 for AT
+# WF_values = np.random.randint(0, 2, size=1000)  # Generate 100 random values of 0 or 1 for WF
+#
+# # Create a DataFrame with the headers and variables
+# data = pd.DataFrame({
+#     "RP": np.ones(1000, dtype=int),  # Set RP column to 1
+#     "WV": np.ones(1000, dtype=int),  # Set WV column to 1
+#     "WH": np.ones(1000, dtype=int),  # Set WH column to 1
+#     "AT": AT_values,  # Variable values for AT column
+#     "WF": WF_values  # Variable values for WF column
+# })
+# data.to_csv("dataset.csv", index=False)
 
+# dataset = [
+#     ["RP", "WV", "WH", "AT", "WF" ],
+#     [True, True, True, True, False],
+#     [True, True, True, False, True],
+#     [True, True, True, True, False],
+#     [True, True, True, False, True],
+#     [True, True, True, True, True],
+#     [True, True, True, True, False]
+# ]
 
 target ='WF'
 variable ='AT'
 
 # Read the CSV dataset
-df = pd.read_csv("dataset.csv")
+df = pd.read_csv("datasetold.csv")
 # Convert the dataset to a pandas DataFrame
 #df = pd.DataFrame(dataset[1:], columns=dataset[0])
 
@@ -73,17 +95,18 @@ def learn_prism_commands(node_id, class_probabilities,at):
     RIGHT = []
     for elt in range(0, len(propb)):
         if propb[elt] != 0:
-            RIGHT.append(str(propb[elt]) + ':(' + target + "'=" + str(elt) + ')')
+            RIGHT.append(str(propb[elt]) + ':(' + target + "'=" + str(elt) + ")  & (done'=0)")
     separator = " + "  # Specify the separator you want to use
     merged_right = separator.join(RIGHT)
-    return f"[rule{node_id}] {merged_left} -> {merged_right};"
+    return f"[rule{node_id}] {merged_left} & (done=1)-> {merged_right};"
 
 def learn_prism_module_variable( ):
     list_of_variable=[]
     for elt in range(0, len(X.columns)):
         if variable != X.columns[elt]:
             list_of_variable.append(X.columns[elt] +' : [0..1] init 1 ;')
-    list_of_variable.append(target + ' : [0..1] init 0 ;')
+    list_of_variable.append(target + ' : [-1..1] init -1 ;')
+    list_of_variable.append('done : [0..1] init 1 ;')
     return list_of_variable
 listOfCommands=[]
 # Define a function to recursively traverse the decision tree and calculate weighted probability
