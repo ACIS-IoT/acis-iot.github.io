@@ -1,0 +1,191 @@
+csg
+
+//author: Abdelhakim Baouya
+
+const int scenario; 
+
+player p1  Attacker endplayer
+player p2  Sensor   endplayer
+
+player p3  Exchange_KEY_WL   endplayer
+player p4  Queue_KEY_WL   endplayer
+
+player p5  Exchange_KEY_RP   endplayer
+player p6  Queue_KEY_RP   endplayer
+
+player p7  Exchange_KEY_WV   endplayer
+player p8  Queue_KEY_WV   endplayer
+
+
+const int EMPTY = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = -2;
+const int MAX_VAL = 3;
+
+const int EXCHANGE_TYPE = 1;//direct
+const int QUEUE_MAX = 3;//direct
+
+//Routing keys
+const int KEY_WL = 0;//direct
+const int KEY_RP = 1;//direct
+const int KEY_WV = 2;//direct
+
+const int MAX_KEYS = 3;//direct
+//Attaque frequency//dos,arp, mirai
+//1 Dos
+//2 ARP
+//3 Mirai 
+const double lambda =scenario=1? 0.075:(scenario=2 ? 0.13 : 0.1);
+
+const int rounds; // number of rounds
+
+//labelling
+label "sensors_empty" = (pld1_3=EMPTY) & (pld4_3=EMPTY)& (pld5_3=EMPTY);
+
+label "payload_tamper"= (pld1_3=ATTACK_VAL) | (pld4_3=ATTACK_VAL)| (pld5_3=ATTACK_VAL);
+
+label "binding_tamper"= (rk1_3=ATTACK_VAL) | (rk4_3=ATTACK_VAL)| (rk5_3=ATTACK_VAL);
+
+label "queue_filled"= (Queue_WL_FILLED) | (Queue_RP_FILLED)| (Queue_WV_FILLED);
+
+module rounds
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
+
+//Attacker Model
+module Attacker
+  pld2:  [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+  rk2:   [INIT_VAL..MAX_KEYS]  init ATTACK_VAL;
+  [write2]     r<rounds    -> true; 
+  [wait2]      r<rounds    -> true;
+endmodule
+
+
+//WL Sensor Model
+module Sensor
+  pld1: [INIT_VAL..MAX_VAL] init 1;
+  rk1 : [INIT_VAL..MAX_VAL] init KEY_WL;
+  pld4: [INIT_VAL..MAX_VAL] init 1;
+  rk4 : [INIT_VAL..MAX_VAL] init KEY_RP;
+  pld5: [INIT_VAL..MAX_VAL] init 1;
+  rk5 : [INIT_VAL..MAX_VAL] init KEY_WV;
+
+  [write1]       r<rounds    -> true;
+  [wait1]        r<rounds    -> true;
+endmodule
+
+//SouthBound Bridge Activity Register
+module SouthBound_Register
+	pld1_3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk1_3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+
+	pld4_3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk4_3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+
+	pld5_3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk5_3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+
+//////////////////////////////////////////	
+	[write1,  write2]   true -> (1-lambda):(pld1_3'=pld1)&(rk1_3'=rk1)&(pld4_3'=pld4)&(rk4_3'=rk4)&(pld5_3'=pld5)&(rk5_3'=rk5)
+						        +lambda:(pld1_3'=pld2)&(rk1_3'=rk2)&(pld4_3'=pld2)&(rk4_3'=rk2)&(pld5_3'=pld5)&(rk5_3'=rk2);
+	[write1,  wait2 ]   true ->            (pld1_3'=pld1)&(rk1_3'=rk1)&(pld4_3'=pld4)&(rk4_3'=rk4)&(pld5_3'=pld5)&(rk5_3'=rk5);
+	
+	[wait1,  write2]    true ->           (1-lambda):true +lambda:(pld1_3'=pld2)&(rk1_3'=rk2)&(pld4_3'=pld2)&(rk4_3'=rk2)&(pld5_3'=pld5)&(rk5_3'=rk2);
+	[wait1,  wait2 ]    true -> 	       (pld1_3'=EMPTY)&(rk1_3'=EMPTY)&(pld4_3'=EMPTY)&(rk4_3'=EMPTY)&(pld5_3'=pld5)&(rk5_3'=rk5);
+	//////////////////////////////////////////
+	
+endmodule
+
+//Exchange Brocker
+module Exchange_KEY_WL
+	[exchange_KEY_WL]    r<rounds -> true;
+endmodule
+
+//Exchange Brocker Register
+module Exchange_Register_KEY_WL
+	[exchange_KEY_WL, enqueue_KEY_WL]   (pld1_3 !=EMPTY) & (rk1_3 !=EMPTY)-> true;
+endmodule
+
+//Queue 
+module Queue_KEY_WL
+ b_0_KEY_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ b_1_KEY_WL: [INIT_VAL..MAX_VAL]  init EMPTY;
+ bk_KEY_WL : [KEY_WL..MAX_KEYS] init KEY_WL;
+ i_KEY_WL   :[0..QUEUE_MAX] init 0;
+ [enqueue_KEY_WL] rk1_3 = bk_KEY_WL & i_KEY_WL<QUEUE_MAX   -> (i_KEY_WL'=mod(i_KEY_WL+1,QUEUE_MAX)) &(b_0_KEY_WL'=(i_KEY_WL'=0)?pld1_3:b_0_KEY_WL) & (b_1_KEY_WL'=(i_KEY_WL=1)?pld1_3:b_1_KEY_WL);
+ [dequeue_KEY_WL]        i_KEY_WL>=0          -> (i_KEY_WL'=i_KEY_WL-1) &(b_0_KEY_WL'=(i_KEY_WL=0)?EMPTY:b_0_KEY_WL) & (b_1_KEY_WL'=(i_KEY_WL=1)?EMPTY:b_1_KEY_WL);
+endmodule
+
+formula Queue_WL_FILLED= i_KEY_WL>0;
+//////////////////////////////////////////////////
+
+//Exchange Brocker
+module Exchange_KEY_RP
+	[exchange_KEY_RP]    r<rounds -> true;
+endmodule
+
+//Exchange Brocker Register
+module Exchange_Register_KEY_RP
+	[exchange_KEY_RP, enqueue_KEY_RP]  (pld4_3 !=EMPTY) & (rk4_3 !=EMPTY)-> true;
+endmodule
+
+//Queue 
+module Queue_KEY_RP
+ b_0_KEY_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ b_1_KEY_RP: [INIT_VAL..MAX_VAL]  init EMPTY;
+ bk_KEY_RP : [KEY_RP..MAX_KEYS] init KEY_RP;
+ i_KEY_RP   :[-1..QUEUE_MAX] init 0;
+ [enqueue_KEY_RP] rk4_3  =bk_KEY_RP & i_KEY_RP<QUEUE_MAX   -> (i_KEY_RP'=mod(i_KEY_RP+1,QUEUE_MAX)) &(b_0_KEY_RP'=(i_KEY_RP=0)?pld4_3:b_0_KEY_RP) & (b_1_KEY_RP'=(i_KEY_RP=1)?pld4_3:b_1_KEY_RP);
+ [dequeue_KEY_RP]        i_KEY_RP>=0          -> (i_KEY_RP'=i_KEY_RP-1) &(b_0_KEY_RP'=(i_KEY_RP=0)?EMPTY:b_0_KEY_RP) & (b_1_KEY_RP'=(i_KEY_RP=1)?EMPTY:b_1_KEY_RP);
+
+endmodule
+
+formula Queue_RP_FILLED= i_KEY_RP>0;
+////////////////////////////////////////////////
+
+
+
+//Exchange Brocker
+module Exchange_KEY_WV
+	[exchange_KEY_WV]    r<rounds -> true;
+endmodule
+
+//Exchange Brocker Register
+module Exchange_Register_KEY_WV
+	[exchange_KEY_WV, enqueue_KEY_WV]   (pld5_3 !=EMPTY) & (rk5_3  !=EMPTY)-> true;
+endmodule
+
+//Queue 
+module Queue_KEY_WV
+ b_0_KEY_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ b_1_KEY_WV: [INIT_VAL..MAX_VAL]  init EMPTY;
+ bk_KEY_WV : [KEY_WV..MAX_KEYS] init KEY_WV;
+ i_KEY_WV   :[-1..QUEUE_MAX] init 0;
+ [enqueue_KEY_WV] rk5_3 =bk_KEY_WV & i_KEY_WV<QUEUE_MAX   -> (i_KEY_WV'=mod(i_KEY_WV+1,QUEUE_MAX)) &(b_0_KEY_WV'=(i_KEY_WV=0)?pld5_3:b_0_KEY_WV) & (b_1_KEY_WV'=(i_KEY_WV=1)?pld5_3:b_1_KEY_WV);
+ [dequeue_KEY_WV]        i_KEY_WV>=0          -> (i_KEY_WV'=i_KEY_WV-1) &(b_0_KEY_WV'=(i_KEY_WV=0)?EMPTY:b_0_KEY_WV) & (b_1_KEY_WV'=(i_KEY_WV=1)?EMPTY:b_1_KEY_WV);
+
+endmodule
+
+formula Queue_WV_FILLED=  i_KEY_WV>0;
+
+
+rewards "empty"
+	[exchange_KEY_WL, enqueue_KEY_WL] b_0_KEY_WL=EMPTY | b_1_KEY_WL=EMPTY : 0.5;
+	[exchange_KEY_RP, enqueue_KEY_RP] b_0_KEY_RP=EMPTY | b_1_KEY_RP=EMPTY : 0.5;
+	[exchange_KEY_WV, enqueue_KEY_WV] b_0_KEY_WV=EMPTY | b_1_KEY_WV=EMPTY : 0.5;
+endrewards
+
+
+
+
+
+rewards "sent"
+	[write1,  write2] true : 1;
+	[write1,  wait2 ] true : 1;
+
+endrewards

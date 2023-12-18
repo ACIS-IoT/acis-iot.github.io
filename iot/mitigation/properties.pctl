@@ -1,0 +1,5 @@
+const int T;
+
+<<p1:p2>>Pmax=? [ !"payload_tamper" U "payload_tamper" ]
+
+<<p1>>R{"damage"}max=? [ F r=rounds ]/<<p2>>R{"sent"}max=? [ F r=rounds ]

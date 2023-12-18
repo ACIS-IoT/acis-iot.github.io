@@ -1,0 +1,118 @@
+
+csg
+
+//author: Abdelhakim Baouya
+
+const int scenario; // 0 or 1 or 2
+
+player p1  Attacker endplayer
+player p2  Sensor   endplayer
+const int K;
+const int EMPTY = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = -2;
+const int MAX_VAL = 3;
+
+const int EXCHANGE_TYPE = 1;//direct
+const int QUEUE_MAX = 2;//direct
+
+//Routing keys
+const int KEY_WL = 0;//direct
+const int KEY_RP = 1;//direct
+const int KEY_WV = 2;//direct
+
+const int MAX_KEYS = 3;//direct
+//Attaque frequency//dos,arp
+const double lambda =scenario=1 ? 0.13 : 0.07;
+
+const int rounds; // number of rounds
+
+//labelling
+label "sensors_empty" = (pld1_3=EMPTY) & (pld4_3=EMPTY)& (pld5_3=EMPTY);
+
+label "payload_tamper"= (pld1_3=ATTACK_VAL) | (pld4_3=ATTACK_VAL)| (pld5_3=ATTACK_VAL);
+
+module rounds
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
+
+//Attacker Model
+module Attacker
+  pld2:  [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+  rk2:   [KEY_WL..MAX_KEYS]  init KEY_WL;
+  [write2]     r<rounds    -> true; 
+  [wait2]      r<rounds    -> true;
+endmodule
+
+
+//WL Sensor Model
+module Sensor
+  pld1: [INIT_VAL..MAX_VAL] init 1;
+  rk1 : [INIT_VAL..MAX_VAL] init KEY_WL;
+  pld4: [INIT_VAL..MAX_VAL] init 1;
+  rk4 : [INIT_VAL..MAX_VAL] init KEY_RP;
+  pld5: [INIT_VAL..MAX_VAL] init 1;
+  rk5 : [INIT_VAL..MAX_VAL] init KEY_WV;
+
+  [write1]       r<rounds    -> true;
+  [wait1]        r<rounds    -> true;
+endmodule
+
+//SouthBound Bridge Activity Register
+module SouthBound_Register
+	pld1_3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk1_3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+
+	pld4_3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk4_3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+
+	pld5_3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk5_3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+
+//////////////////////////////////////////	
+	[write1,  write2]   true -> (1-lambda):(pld1_3'=pld1)&(rk1_3'=rk1)&(pld4_3'=pld4)&(rk4_3'=rk4)&(pld5_3'=pld5)&(rk5_3'=rk5)
+						        +lambda:(pld1_3'=pld2)&(rk1_3'=rk1)&(pld4_3'=pld2)&(rk4_3'=rk4)&(pld5_3'=pld2)&(rk5_3'=rk5);
+	[write1,  wait2 ]   true ->            (pld1_3'=pld1)&(rk1_3'=rk1)&(pld4_3'=pld4)&(rk4_3'=rk4)&(pld5_3'=pld5)&(rk5_3'=rk5);
+	
+	[wait1,  write2]    true -> (1-lambda):(pld1_3'=EMPTY)&(rk1_3'=EMPTY)&(pld4_3'=EMPTY)&(rk4_3'=EMPTY)&(pld5_3'=pld5)&(rk5_3'=rk5)
+						        +lambda:(pld1_3'=EMPTY)&(rk1_3'=EMPTY)&(pld4_3'=EMPTY)&(rk4_3'=EMPTY)&(pld5_3'=pld2)&(rk5_3'=rk5);
+	[wait1,  wait2 ]    true -> 		(pld1_3'=EMPTY)&(rk1_3'=EMPTY)&(pld4_3'=EMPTY)&(rk4_3'=EMPTY)&(pld5_3'=pld5)&(rk5_3'=rk5);
+	//////////////////////////////////////////
+	
+endmodule
+
+rewards "damage"
+	[write1,  write2] pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1;
+	[write1,  wait2 ] pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1;
+	[wait1,   write2 ] pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1; 
+	[wait1,   wait2  ] pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1;
+
+
+
+	[write1,  write2] !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2) : 0;
+	[write1,  wait2 ] !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2)  : 0;
+	[wait1,   write2 ] !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2)  : 0; 
+	[wait1,   wait2  ] !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2)  : 0;
+
+endrewards
+
+
+rewards "i_damage"
+	[write1,  write2] r= K & pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1;
+	[write1,  wait2 ] r= K &pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1;
+	[wait1,   write2 ] r= K & pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1; 
+	[wait1,   wait2  ] r= K & pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2 : 1;
+
+
+
+	[write1,  write2] r= K & !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2) : 0;
+	[write1,  wait2 ] r= K & !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2)  : 0;
+	[wait1,   write2 ] r= K & !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2)  : 0; 
+	[wait1,   wait2  ] r= K & !(pld1_3=pld2 | pld4_3=pld2 | pld5_3=pld2)  : 0;
+
+endrewards

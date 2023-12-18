@@ -1,0 +1,5 @@
+const int T;
+
+<<p1,p2,p3,p4,p5,p6,p7,p8>>Pmax=? [ !"queue_filled" U "queue_filled" ]
+
+<<p1,p2,p3,p4,p5,p6,p7,p8>>R{"empty"}max=? [ F r=rounds ]/<<p1,p2,p3,p4,p5,p6,p7,p8>>R{"sent"}max=? [ F r=rounds ]

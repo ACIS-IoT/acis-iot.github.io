@@ -1,0 +1,103 @@
+
+csg
+
+//author: Abdelhakim Baouya
+
+const int scenario; // 0 or 1 or 2
+
+player p1 WLSensor  endplayer
+player p2 Attacker endplayer
+player p3 Exchange  endplayer
+player p4 Queue     endplayer
+player p5 Consumer  endplayer
+
+const int EMPTY = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = -2;
+const int MAX_VAL = 3;
+
+const int EXCHANGE_TYPE = 1;//direct
+const int QUEUE_MAX = 2;//direct
+
+//Routing keys
+const int KEY_0 = 0;//direct
+const int MAX_KEYS = 3;//direct
+//Attaque frequency
+const double lambda =(scenario=1 ? 0.2 : 0.8);
+
+const int rounds; // number of rounds
+
+module rounds
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
+
+//Attacker Model
+module Attacker
+  pld2:  [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+  rk2: [KEY_0..MAX_KEYS] init KEY_0;
+  [write1]      r<rounds   -> true; 
+  [wait1]          r<rounds   -> true;
+endmodule
+
+
+//Sensor Model
+module WLSensor
+  pld1: [INIT_VAL..MAX_VAL] init 1;
+  rk1 : [INIT_VAL..MAX_VAL] init KEY_0;
+  [write2]      r<rounds   -> true;
+  [wait2]          r<rounds   -> true;
+endmodule
+
+//SouthBound Bridge Activity Register
+module SouthBound_Register
+	pld3  : [INIT_VAL..MAX_VAL] init EMPTY;
+	rk3   : [INIT_VAL..MAX_KEYS] init EMPTY;
+	
+	[write1, write2]   true      -> (1-lambda):(pld3'=pld1)&(rk3'=rk1)+lambda:(pld3'=pld2)&(rk3'=rk2);
+	[write1, wait2]    true      -> (pld3'=pld1)&(rk3'=rk1);
+	[wait1, write2]    true      -> (pld3'=pld2)&(rk3'=pld2);
+	[wait1, wait2]     true      -> (pld3'=EMPTY) & (rk3'=EMPTY);
+
+	
+endmodule
+
+
+//Exchange Brocker
+module Exchange
+	[exchange]    EXCHANGE_TYPE=1 -> true;
+endmodule
+
+//Exchange Brocker Register
+module Exchange_Register
+	[exchange, enqueue]  rk3=bk & (pld3!=EMPTY) & (rk3!=EMPTY)-> true;
+endmodule
+
+//Queue 
+module Queue
+ b_0: [INIT_VAL..MAX_VAL]  init EMPTY;
+ b_1: [INIT_VAL..MAX_VAL]  init EMPTY;
+ bk : [KEY_0..MAX_KEYS] init KEY_0;
+ i   :[-1..QUEUE_MAX] init 0;
+ [enqueue]        i<QUEUE_MAX   -> (i'=mod(i+1,QUEUE_MAX)) &(b_0'=(i=0)?pld3:b_0) & (b_1'=(i=1)?pld3:b_1);
+ [dequeue]        i>=0          -> (i'=i-1) &(b_0'=(i=0)?EMPTY:b_0) & (b_1'=(i=1)?EMPTY:b_1);
+ [read]  true -> true;
+endmodule
+
+//Queue Activity register
+module Queue_Register
+	b: [INIT_VAL..MAX_VAL]  init EMPTY;
+	[dequeue, initl]  true-> (b'=(i=0)?b_0:b_1);
+	[read,consume] b!=EMPTY-> true;
+endmodule
+
+//Consumer
+module Consumer
+	consumed: [INIT_VAL..MAX_VAL]  init EMPTY;
+	[initl]    true-> true;
+	[consume]  true-> (consumed'=b);
+endmodule
