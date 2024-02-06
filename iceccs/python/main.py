@@ -12,29 +12,7 @@ import BayesianNetwork
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.calibration import CalibratedClassifierCV
 
-# Generate values for AT and WF
-# AT_values = np.random.randint(0, 2, size=1000)  # Generate 100 random values of 0 or 1 for AT
-# WF_values = np.random.randint(0, 2, size=1000)  # Generate 100 random values of 0 or 1 for WF
-#
-# # Create a DataFrame with the headers and variables
-# data = pd.DataFrame({
-#     "RP": np.ones(1000, dtype=int),  # Set RP column to 1
-#     "WV": np.ones(1000, dtype=int),  # Set WV column to 1
-#     "WH": np.ones(1000, dtype=int),  # Set WH column to 1
-#     "AT": AT_values,  # Variable values for AT column
-#     "WF": WF_values  # Variable values for WF column
-# })
-# data.to_csv("dataset.csv", index=False)
 
-# dataset = [
-#     ["RP", "WV", "WH", "AT", "WF" ],
-#     [True, True, True, True, False],
-#     [True, True, True, False, True],
-#     [True, True, True, True, False],
-#     [True, True, True, False, True],
-#     [True, True, True, True, True],
-#     [True, True, True, True, False]
-# ]
 
 target ='WF'
 variable ='AT'
