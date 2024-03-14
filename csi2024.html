@@ -7,12 +7,12 @@
       height: 100%;
       margin: 0;
       padding: 0;
+      font-family: Arial, sans-serif;
     }
 
     .content {
       min-height: 100%;
-      margin-left: 40px;
-      margin-right: 30px;
+      margin: 0 40px;
       padding-bottom: 40px; /* Adjust this value to leave space for the footer */
     }
 
@@ -25,42 +25,109 @@
       padding: 10px;
       text-align: center;
     }
-        
-.container {
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
 
-/* Actual card with shadow */
-.card {
-  height: 200px;
-  width: 200px;
-  border-radius: 5px;
-  box-shadow: 1px 2px 3px 4px rgba(12,12,12,0.2);
-}
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
+    .container {
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+    }
 
-th, td {
-  text-align: left;
-  padding: 8px;
-}
+    /* Actual card with shadow */
+    .card {
+      height: 200px;
+      width: 200px;
+      border-radius: 5px;
+      box-shadow: 1px 2px 3px 4px rgba(12,12,12,0.2);
+    }
 
-tr:nth-child(even){background-color: #f2f2f2}
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
 
-th {
-  background-color: #4CAF50;
-  color: white;
-}
+    th, td {
+      text-align: left;
+      padding: 8px;
+    }
 
+    tr:nth-child(even){
+      background-color: #f2f2f2;
+    }
 
-    </style>
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    h1 {
+      color: green;
+      font-size: 18px;
+    }
+
+    h2 {
+      color: green;
+      font-size: 14px;
+    }
+
+    li {
+      text-align: justify;
+    }
+
+    .citebox {
+      margin: 20px;
+    }
+
+    .citeboxheader {
+      margin-bottom: 10px;
+    }
+
+    .citeboxheader h1 {
+      font-size: 18px;
+      color: #333;
+    }
+
+    .red-text {
+      color: red;
+    }
+
+    .download-link:hover {
+      text-decoration: underline;
+    }
+
+    .scrollable-table {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .citebox {
+      margin-bottom: 40px;
+    }
+
+    .footer-content {
+      display: flex;
+      align-items: center;
+    }
+
+    .footer-content img {
+      margin-right: 10px;
+    }
+
+    .footer-text {
+      text-align: center;
+      margin: auto;
+    }
+     .hidden {
+      display: none;
+    }
+    
+    
+    #hiddenCode {
+        display: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -76,10 +143,12 @@ Abdelhakim Baouya, Brahim Hamid and Saddek Bensalem.
 In <em> Computer Standards & Interfaces </em>, 2024.</li></ul>
 
   
+      <div class="citebox">
+      <table>
+        <tr>
+          <th style="background-color: #00aaff; color: white;" colspan="4">Developed Artefacts</th>
+        </tr>
 
-<h1 style="color:green;font-size:14px;">Developed Artefacts</h1>
-
-  <table>
 <tr>
     <th>ID</th>
     <th>PRISM Model Description </th>
@@ -146,7 +215,12 @@ In <em> Computer Standards & Interfaces </em>, 2024.</li></ul>
   <td><a href="csi/python/main.py">Download</a></td>
   <td><a href="csi/python/gateway.csv">Download Dataset</a></td>
 </tr>
-  
+      </table>
+    </div>
+	
+
+
+    </div>
   
   <! --
       <tr>
@@ -175,10 +249,7 @@ In <em> Computer Standards & Interfaces </em>, 2024.</li></ul>
   </tr>
   
 -->    
-    
-</table>
 
-    </div>
 
 
 
