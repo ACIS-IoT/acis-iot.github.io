@@ -1,0 +1,10 @@
+const int T;
+
+P=? [ G (!(D1H=D2H)=>(F (D1H=D2H))) ]
+
+P=? [ !(D1H=D2H) U<=T (D1H=D2H) ]
+
+P=? [ !(D1H=D2H)=>(F (D1H=D2H)) ]
+
+ R{"Desynchronized"}max=?[C<=T]
+

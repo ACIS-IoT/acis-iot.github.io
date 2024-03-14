@@ -1,0 +1,153 @@
+In this section, we will explore the comprehensive analytical background of clock drifts, also referred to as clock deviation (both terms are correct), and the formalism that captures the underlying semantics associated with clock drifts.
+\subsection{A comprehensive analytical background on clock drifts}
+
+
+\subsection{Modeling formalism}
+\subsubsection{Probabilistic automata}
+\label{sec:pa}
+
+
+Probabilistic Automata (PA) \cite{ref27} is a modeling formalism that exhibits probabilistic and nondeterministic features. Definition \ref{def:pa} formally illustrates a PA where \emath{Dist(S)} denotes the set of convex distributions over the set of states $S$ and \emath{\mu} is a distribution in \emath{Dist(S)} that assigns a probability \emath{\mu(s_{i})=p_{i}} to the state \emath{s_{i} \in S}.
+
+\begin{mydef} \label{def:pa} \normalfont  A Probabilistic automata is a tuple \emath{\mathcal{M} =\langle  s_{0}, S, \Sigma, AP, L, \delta\rangle}:
+\label{ts}
+\begin{itemize}
+	\item \emath{s_{0}} is an initial state, such that \emath{s_{0} \in S},
+ 
+	\item \emath{S} is a set of states,
+
+	\item \emath{\Sigma}  is a finite set of actions,
+
+ 	\item \emath{L: S \rightarrow 2^{AP}} is a labeling function that assigns each state \emath{s \in S}  to a set of atomic propositions taken from the set of atomic propositions (\emath{AP}), and
+
+    \item \emath{\delta : S \times \Sigma \rightarrow Dist(S)} is a probabilistic transition function assigning for each \emath{s \in S} and \emath{\alpha \in \Sigma } a probabilistic distribution \emath{\mu \in Dist(S)}. 
+\end{itemize}
+\end{mydef}
+
+
+For PA's composition, this concept is modeled by the parallel composition \cite{ref27}. During synchronization, each PA resolves its probabilistic choice independently \cite{ref27}. For transitions, \emath{s_{1} \xrightarrow[]{ \alpha} \mu_{1}}  and \emath{s_{2} \xrightarrow[]{ \alpha} \mu_{2}} that synchronize in \emath{\alpha} then the composed state (\emath{s'_{1},s'_{2}}) is reached from the state (\emath{s_{1},s_{2}}) with probability (\emath{\mu_{1}(s'_{1}) \times \mu_{2}(s'_{2})}).  In the no synchronization case, a PA takes a transition where the other remains in its current state with probability one.
+
+
+Performing probabilistic model checking relies on probabilistic automata (i.e., MDP) and properties expressed in Probabilistic Computation Tree Logic (PCTL)~\cite{hanssonlogic1994}, \cite{ref27}, \cite{goosit1995}. PCTL enables the expression of probabilistic queries such as \quot{\emph{What is the probability that the system will eventually reboot ?}}, expressed as P =? [F reboot]. In this context, \quot{reboot} is the label that refers to the states indicating a system reboot.
+
+
+\noindent
+\begin{figure*}[!ht]
+    \centering
+	\begin{center}
+	
+		\begin{tabular}{ |m{15cm}| }			\hline
+    			\\ [1.5ex]
+    		\begin{itemize}
+    		
+	        \setlength\itemsep{1.5em}
+
+        \item \textbf{Update}. This axiom describes the probabilistic updates for variable \emath{v_{i}}: $$\frac{ x_{i} \xrightarrow{g:a}_{\lambda} {x'_{i}} \wedge \theta \models g } { \langle x_{0},\ldots,x_{i}, \ldots,x_{n},\theta\rangle \xrightarrow{a}_{\lambda}\langle x_{0},\ldots,x'_{i}, \ldots,x_{n},\theta'\rangle  }  $$
+              where  \emath{X'=X[v_{si}:=eval(v_{si})]} and \emath{\theta'=\theta[v_{i}:=effect(v_{i})]}
+
+
+              
+
+
+        \item \textbf{Synchronization}. This axiom permits the synchronization between modules on a given action a: $$\frac{ x_{i} \xrightarrow{g_{1}:a}_{\lambda_{i}}x'_{i} \wedge \theta \models g_{1} \wedge x_{j} \xrightarrow{g_{2}:a}_{\lambda_{j}}x'_{j} \wedge \theta \models g_{2} } { \langle x_{0},\ldots,x_{i},\ldots,x_{j}, \ldots,x_{n},\theta\rangle \xrightarrow{a}_{\lambda_{i} \cdot\lambda_{j}}\langle x_{0},\ldots,x'_{i},\ldots,x'_{j}, \ldots,x_{n},\theta'\rangle }  $$   where  \emath{X'=X[v_{si}:=eval(v_{si})} and \emath{\theta'=\theta[v_{i}:=effect(v_{i})]}      
+
+        \item \textbf{Send/receive}. This axiom describes synchronous data exchange: $$\frac{ x_{0} \xrightarrow{g:a!v}_{\lambda_{0}} {x'_{0}} \wedge \theta_{0} \models g_{0} \wedge x_{1} \xrightarrow{g:a?v}_{\lambda_{1}} {x'_{1}} \wedge \theta_{1} \models g_{1}} { \langle x_{0},\ldots,x_{i}, \ldots,x_{n},\theta\rangle \xrightarrow{a}_{\lambda}\langle x_{0},\ldots,x'_{i}, \ldots,x_{n},\theta'\rangle  }  $$
+              where  \emath{X'=X[v_{s0}:=eval(v_{s0}),v_{s1}:=eval(v_{s1})]} and \emath{\theta'=\theta[v_{i}:=effect(v_{i})]}
+              
+        \end{itemize}
+      \\
+		\hline
+		\end{tabular}
+	\end{center}
+    \caption{PRISM-PA Semantics Rules.}
+    \label{fig:prism:rules}
+\end{figure*} 
+\normalsize
+
+
+\subsubsection{The PRISM language}
+\label{sec:prism:rappel}
+We consider the probabilistic automata (i.e., Markov Decision Process (MDP)) in PRISM language \cite{Kwiatkowskaprism2011} as a modeling formalism to capture the semantics of components and connectors. 
+
+%\subsection{Introduction to PRISM}
+The PRISM model is composed of a set of modules that can synchronize. A set of variables and commands characterizes each module. The variable's valuations represent the state of the module. The behavior of each module is described by a set of commands (i.e., transitions). A command takes the form: $ [a] g \rightarrow \lambda_{1}: u_{1} + \ldots+ \lambda_{n}: u_{n} $ or, $[a] g \rightarrow u$, which means, for the action \quot{\emath{a}} if the guard \quot{\emath{g}} is true, then, an update \quot{\emath{u_{i}}} is enabled with a probability \quot{\emath{\lambda_{i}}}. A guard is a logical proposition consisting of variable evaluation and propositional logic operators. The update \quot{\emath{u_{i}}} is an evaluation of variables expressed as a conjunction of assignments: \emath{v_{i}'=val_{i}+\ldots+v_{n}'=val_{n}} where \quot{\emath{v_{i}}} are local variables and \emath{val_{i}} are values evaluated via expressions denoted by \quot{\emath{eval}} such that \emath{ eval: V \rightarrow \mathbb{D}} (Utilized for evaluating automata states.) and effect such that\emath{ effect: V \rightarrow \mathbb{D}} (Utilized for evaluating module variables).
+Let \emath{\mathbb{D}} be a domain of variables such as \emath{\mathbb{D}=\mathbb{N} \cup \{true,false\} }. We define valuations for variables  as \quot{\emath{X}} such that \emath{ X: V \rightarrow \mathbb{D} } that associate each variable in \emath{V} with a value in \emath{\mathbb{D}}. We use \emath{x_{0}, x_{1},\ldots, x_{n}} as new valuations of variables \emath{v_{0}, v_{1},\ldots, v_{n}}. In the PRISM module, each local variable is initialized, and then we define a function \emath{init: V \rightarrow \mathbb{D}} that assigns an initial value in \emath{\mathbb{D}} for variables in \emath{V}. Each PRISM command is encapsulated within a PRISM module defined as follows:
+
+\begin{mydef} \label{def:prismmodule} \normalfont A PRISM module \quot{\emath{\mathcal{D}}} is a tuple \emath{\mathcal{D}= \langle \vartheta_{L}, C\rangle}, where: 
+ \begin{itemize}
+\item \emath{\vartheta_{L}} is a finite set of local variables associated with the module \emath{\mathcal{D}} initialized with \emath{init},
+\item \emath{C} is a finite set of commands that defines the behavior of module \emath{\mathcal{D}}. Formally, we consider the command of the form \emath{ [a] g \rightarrow \lambda: u} as \emath{x_{i}\xrightarrow{g:a}_{\lambda}x'_{i}} such that \emath{x_{i}\models g}, \emath{g \in Const(V)} and \emath{X':=X[v_{i}:=eval(v_{i})]}. 
+            \end{itemize}
+\end{mydef}
+
+
+\subsubsection{PRISM-PA semantics}
+Definition \ref{def:prismpa}  stipulates the formal definition of PRISM probabilistic automata denoted by  \emath{\mathcal{M}_\mathcal{P}}. The stepwise behavior of \emath{\mathcal{M}_\mathcal{P}} follows the operational semantic rules provided in \fig{fig:prism:rules}. However, we would like to highlight the concept of channeling as described by \cite{baierprinciples2008} , where communication is depicted using the Communicating Sequential Processes (CSP) notation. In this notation, the symbol "!" represents the sending operation, while the symbol "?" represents the receiving operation.
+
+
+\begin{mydef} \label{def:prismpa}\normalfont (PRISM-PA) A probabilistic automata of a PRISM model \emath{\mathcal{P}} is a tuple  \emath{M\mathcal{_{P}}=\langle  s_{0}, S,  AP, L, \Sigma, \delta \rangle}:
+\begin{itemize}
+
+	\item \emath{s_{0} = (\langle x_{0},\ldots,x_{n}, \theta \rangle )} is an initial state such that \emath{ x_{0}\wedge\ldots\wedge x_{n}\wedge \theta \models g_{0}}, \emath{g_{0}} is the initial guard to be satisfied by the initial state.
+ 
+	\item \emath{S= \mathbb{D}^{V}} is a finite set of states reachable from \emath{s_{0}},
+
+ 	\item \emath{AP= V \cup Const(V)} is a set of variable valuations,
+  
+	\item \emath{L(\langle x_{0},\ldots,x_{n} \rangle) = \{ x_{0},\ldots,x_{n} \} } such that \emath{[[g(X)]]=\top} is a labeling function,
+ 
+	\item \emath{\Sigma}  is a finite set of actions, and  
+
+    \item \emath{\delta} is deﬁned by the PRISM commands C modeled by the operational semantics rules in \fig{fig:prism:rules}.
+\end{itemize}
+\end{mydef}
+
+
+\section{OMNeT++ Formalization }
+OMNeT++ \cite{omnet2008} is a versatile C++ simulation library and framework specifically designed for building network and Cyber-Physical simulators. It offers extensibility, modularity, and a component-based approach. The modeling framework comprises two essential components: the NED topology description language and the component code written in C/C++. The NED modeling language is composed of a set of components and connections. We reuse the function \emath{eval} defined previously such that \emath{ eval: \vartheta \rightarrow \mathbb{D}}. The NED Component is defined as follows: 
+
+\begin{mydef} \label{def:omnetcomponent} \normalfont A NED component \quot{\emath{\mathcal{ND}}} is a tuple \emath{\mathcal{ND}= \langle \vartheta, G, Bh, T\rangle}, where: 
+ \begin{itemize}
+\item \emath{\vartheta = \vartheta_{p} \cup \vartheta_{m} \cup \vartheta_{l}}  is a finite set of component variables  
+ \begin{itemize}
+\item  \emath{\vartheta_{p}} is a finite set of parameters associated with the component,
+\item \emath{\vartheta_{m}} is a finite set of messages associated with the component. Also, we consider the \emath{X} as valuation over \emath{\vartheta_{m}} and \emath{X'} as its new valuation.
+\item \emath{\vartheta_{l}} is a finite set of local variables associated with the component.
+\end{itemize}
+\item \emath{G} is a finite set of gates that can take the form of \emath{input} (formally ?) and \emath{output} (formally !). We identify by \emath{\tau} as internal behavior related to the OMNeT component.
+\item \emath{Bh} function is implemented in C/C++ and is responsible for performing specific operations on the received/sent message.
+\item \emath{T \subseteq X \times G \times X'} is state change function executed while the operation \emath{Bh} is being performed.
+\end{itemize}
+\end{mydef}
+
+To gain a deeper understanding of the OMNet++ component behavior, we establish semantics for the  \emath{\mathcal{ND}} state based on component variables as follows: 
+
+\begin{mydef}[\emath{\mathcal{ND}} state] A \emath{\mathcal{ND}} state is the valuation \emath{X} of  \emath{\mathcal{ND}} components variables such that: \emath{X= X_{\vartheta_{p}}\cup X_{\vartheta_{m}}\cup X_{\vartheta_{l}}}.
+
+\end{mydef}
+
+\begin{mydef}[Interaction] An interaction in OMNeT++ refers to a realized connectivity activity between components. It can be represented as a tuple  \emath{\langle G_a, d_a\rangle}, where:     \emath{G_{a} \subseteq G} represents a set of gates that are associated with the interaction \emath{a}, and \emath{d_{a}} is a delay associated with the interaction.
+\end{mydef}
+
+
+
+
+The result of the interaction is a composition of synchronized components obtained by using the component composition operator  $\gamma$  presented in Definition \ref{def:composition}.
+
+
+\begin{mydef}[Composition]\label{def:composition} The composition \emath{\gamma} (\emath{\mathcal{ND}_{1},\ldots,\mathcal{ND}_{n}}) of \emath{n}  components is a network component \emath{\mathcal{N}= \langle \overline{s}, S, \vartheta, G, T\rangle} captured as labeled transition system, where:
+\begin{itemize}
+    \item \emath{\overline{s}=\overline{X_{\vartheta_{p}}} \times \overline{X_{\vartheta_{m}}} \times \overline{X_{\vartheta_{l}}} } is a set of initial values of component variables,
+    \item \emath{S=\{X_{0} \ldots  X_{n}\}} is a set of states,
+    \item \emath{G} is a set of gates,
+	\item \emath{\vartheta = \bigcup\limits_{i=1}^{n} \vartheta_{i}}.
+   \item \emath{T} represents the set of transitions that are recorded by the network. These transitions adopt the form \emath{ s_{i} \gparrow{a} s'_{i}} and are represented by \ref{eq1}  and \ref{eq2} operational semantics rules:
+
+   \begin{equation}\frac{ s_{0} \gparrow{\tau} s'_{0}} { \langle s_{0},\ldots,s_{n}\rangle \xrightarrow{\tau}\langle s'_{0},\ldots,s_{n}\rangle  } \label{eq1} \tag{\emph{Internal Update}} 
+   \end{equation}
+   
+   where  \emath{X'_{\vartheta_{l}}=X[v_{l}:=bh(l)]} 
+   \begin{equation}\frac{ s_{0} \gparrow{a!m} {s'_{0}} \wedge s_{1} \gparrow{a?m} {s'_{1}} } { \langle s_{0},\ldots, s_{1}, \ldots,s_{n}\rangle \xrightarrow{a}\langle s'_{0},\ldots, s'_{1},\ldots,s_{n}\rangle  } \label{eq2} \tag{\emph{Send/receive}} \end{equation}
+              where  \emath{X'_{\vartheta_{m}}=X[v_{m}:=m]} 
+\end{itemize}
+\end{mydef}

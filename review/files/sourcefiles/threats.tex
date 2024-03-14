@@ -1,0 +1,235 @@
+
+% \subsection{The Sensinact edge gateway}
+% The communication between sensors/actuators and the Edge is facilitated by a gateway. An edge gateway, also referred to as an edge device, is a network device that functions as the entry point for data traffic between diverse networks. In addition to routing and protocol conversion, the edge gateway fulfills various functions. It plays a crucial role in enabling the seamless data flow between networks while ensuring connectivity and interoperability. Typically, the edge gateway is deployed at the network's edge, serving mainly as protocol conversion. In the work context, we depend on the Sensinact gateway, which has been brought to fruition after a series of European projects, namely BigClouT \cite{ref144}, WISE IoT \cite{ref145}, IoF2020 \cite{ref146}, ActivAge \cite{ref147}, and ultimately Brain-IoT \cite{brainiot2022}. The specificity of the Sensinact gateway lies in its ability to enable designers and edge architects to specify the data flow using the Sensinact language. The \fig{sensinact} portrays the internal structure of the Sensinact gateway composed of northbound and southbound bridges. The \textit{northbound} bridge provides crucial functionalities for interfacing with remote servers using costly protocols such as HTTP/HTTPS. It supports a wide range of protocols, such as HTTP REST, MQTT, XMPP, JSON RPC, and CDMI.  The \textit{southbound} module facilitates the interaction with sensors and actuators, utilizing various device protocols such as Zigbee, LoRa, and MQTT. In this paper, we will not address the details related to the gateway as they are available in the Brain-IoT deliverables. We would to enhance the southbound bridges of the gateway by supporting RabbiotMQ protocol \cite{Rabbitmq}. The difference from southbound bridge protocols, such as MQTT, lies in its support for asynchronous messages through  message queuing.
+
+
+This section presents the formalization of the RabbitMQ Architecture to make it compatible with the Concurrent Stochastic Game (CSG). We also provide a formal implementation of RabbitMQ in PRISM games. We formalize and model the CAPEC-384 \cite{capec384} attack at various protocol levels, specifically focusing on data corruption, and establish semantic rules to capture their impact.
+
+
+
+\subsection{The RabbitMQ architecture}
+%In \fig{rabbitarchitecture}, we illustrate the architecture of RabbitMQ, which consists of a set of sensors (Producers) and one actuator (consumer). A Raspberry Pi serves as a connectivity interface that converts signals into data sensitive to attacks and acts as both a consumer and producer. The exchange is responsible for accepting messages from the producers and routing them to message queues based on \textbf{binding key}. For example, the water level queue is associated with the binding key \emph{binding key = wl\_pl}. The exchange examines the message properties derived from the sensor's message to extract the \textbf{routing key}, a virtual address used to determine which message queue the message will be stored in by matching the binding keys. 
+
+%\BH{Update the figure with the FOG and the Gateway explicitley}
+
+In \fig{fig:rabbitarchitecture}, we present the architectural depiction of RabbitMQ deployed on an IoT gateway. This deployment comprises a set of Producers, specifically three sensors: water level (WL), water volume (WV), and rain precipitation (RP), as well as two consumers, including one actuator and the Fog. Additionally, a connectivity interface is incorporated to convert signals into data, which is susceptible to attacks, and it serves both the consumers and producers. The exchange is designed to accept messages from the producers and direct them to message queues based on a designated \textbf{binding key}. For instance, the water level queue is associated with the binding key \emph{binding key = wl\_pl}. The exchange scrutinizes the message properties derived from the producers' messages in order to extract the \textbf{routing key}, which functions as a virtual address that determines the appropriate message queue for storage by matching the binding keys. Formally, a RabbitMQ system during execution is defined as follows:
+
+\begin{mydef} \label{def:rq} \normalfont (RabbitMQ). A RabbitMQ system \quot{\emath{\mathcal{RQ}}} is a tuple \emath{\mathcal{RQ}= \langle \mathcal{M}, RK, BK, E, Q\rangle}, where: 
+ \begin{itemize}
+\item \emath{\mathcal{M}} is the message structure alive in \emath{\mathcal{RQ}}, 
+\item \emath{RK}= \emath{\{ rk_{0}, \ldots,rk_{n} \} } is a set of routing keys,
+\item \emath{BK}= \emath{ \{ bk_{0}, \ldots,bk_{n}  \} } is a set of binding keys,
+\item \emath{E} is the exchange node of the system, and 
+\item \emath{Q} = \emath{\{ q_{0}, \ldots, q_{n}\}} is a set of queues supported by \emath{\mathcal{RQ}}. 
+            \end{itemize}
+\end{mydef}
+
+
+Throughout the paper, we consider a message composed of a \emph{routing key and a payload}. Formally, we define a RabbitMQ message as:
+
+\begin{mydef} \label{def:message} \normalfont (Message). A RabbitMQ message \quot{\emath{\mathcal{M}}} is a tuple \emath{\mathcal{M}= \langle rk, pld\rangle}, where: 
+ \begin{itemize}
+\item \emath{rk} is the routing key of sensors message and
+\item \emath{pld} is the payload of the sensed data
+            \end{itemize}
+\end{mydef}
+\begin{figure}[!htb]
+           
+\noindent
+     \centering
+
+		\includegraphics[width=263pt, height =200pt]{ArchitectureRabbit.pdf}
+		\caption{The RabbitMQ Architecture for IoT.}
+	\label{fig:rabbitarchitecture}
+\end{figure}
+
+\subsection{Communication formalism for RabbitMQ architecture in PRISM-games}
+%\BH{missing D3!!}
+In the PRISM-games formalism, the modeling of communication and resource access is facilitated through the use of player and non-player modules. Players are distinguished by unique action labels, while non-CSG players are identified by multiple action labels. For instance, each component of the modeled system in \fig{fig:rabbitarchitecture} is considered as a PRISM module where reading and writing is enabled by access to local PRISM module variables.
+
+
+%In the PRISM module, \emath{rk} and \emath{pld} are local variables initialized to queue keys and sensed data, respectively. Each component of the modeled system in \fig{fig:rabbitarchitecture} is considered as a PRISM module where reading is enabled to other PRISM models with the PRISM system.
+
+
+The algebraic expression of the message \emath{m} transmitted from module \emath{\mathcal{D}_{1}} to \emath{\mathcal{D}_{2}} is expressed through channeling \cite{baierprinciples2008} using send (!) and receive (?) symbols as : \emath{\sset{\mathcal{D}_{s}}=l_{1} \gparrow{\langle a!m \rangle} l_{2}} saying that  \emath{\mathcal{D}_{s}} transmit the message through the channel \emath{a} (PRISM action) and \emath{\sset{\mathcal{D}_{r}}=l_{3} \gparrow{\langle a?x \rangle}l_{4}} saying that \emath{a?x} receives a message via channel \emath{a} and assign it to variable \emath{x}.
+
+
+However, building upon the player definition provided in the previous section, we introduce a two-player rule that involves a competition based on writing. \emath{\mathcal{D}_{3}} records the messages received from both players \emath{\mathcal{D}_{1}} and \emath{\mathcal{D}_{2}.}The rule \ref{writing} is defined as follows:
+
+\begin{boxD}
+%\framedtext{
+	      \begin{equation}\frac{\sset{\mathcal{D}_{1}}= l_{1}\gparrow{a!m_{1}}l'_{1} \wedge \sset{\mathcal{D}_{2}}= l_{2}\gparrow{b!m_{2} }l'_{2}  \wedge
+        \sset{\mathcal{D}_{3}}= l_{3}\gparrow{a?k_{1}, b?k_{2}}l'_{3}        
+       } {  \langle l_{1},\ldots,l_{2},\ldots l_{3},\theta\rangle  \xrightarrow{a,b}\langle l'_{1},\ldots,l'_{2},\ldots,l'_{3},\theta'\rangle } \tag{\emph{Writing}} \label{writing} \end{equation} where \emath{\theta':=\theta[ k_{1}:= m_{1}, k_2:=m_{2}]} and \emath{\mathcal{D}_{1}, \mathcal{D}_{2}} are two CSG players.
+%}
+
+\end{boxD}
+
+
+\subsection{Queues modeling}
+\label{sec:threats:manif}
+
+The RabbitMQ queues are responsible for storing the sensed data based on the routing key present in the transmitted messages. The Exchange module verifies the correspondence between the routing key and the binding key in order to carry out the operation. Firstly, the \emath{Queue} module is regarded as a player responsible for data storage. It is characterized by the queue variable and the identifier binding key, as depicted in lines 1-3 of the code snippet of \lst{queueemodel}. As the PRISM language lacks native support for the list data type, it is necessary to define the list cases and the index variable, as mentioned in lines 1-2. To traverse the queue, we require an item index that is initialized to 0 at line 5. 
+\noindent
+\begin{figure}[!htb]
+    \centering
+    \input{queuelatex.tex}
+    \caption{Queue Model.}
+    \label{fig:queue}
+\end{figure} 
+
+To enhance clarity, the enqueue and dequeue operations are modeled as automata in \fig{fig:queue}. At each state (corresponding to an index value), the \emph{enqueue} operation is performed, and the variables \emath{b_{0},\ldots,b_{1}} are assigned the value of the payload, denoted as $pld$ following the rule \ref{writing}. The consumer (for example a Fog) executes the dequeue operation, while a non-player module stores the dequeued data that will be consumed. The command in line 6 executes the automata model depicted in \fig{fig:queue}, where each state represents an index value. Additionally, we utilize a conditional structure in command line 6 to assign the value of $pld$ to the corresponding variable $b_{i}$ based on the index value. In the dequeue operation, the synchronization based on the dequeue channel is carried out with the command in line 9.
+
+\lstdefinestyle{framed}
+{
+	frame=lrb,         
+	mathescape,
+	numbers=left,
+	belowcaptionskip=-1pt,
+    xleftmargin=3em,
+		xrightmargin=0.01cm,
+    framexleftmargin=3em,
+	framexrightmargin=0pt,
+	framextopmargin=5pt,
+	framexbottommargin=5pt,
+	framesep=0pt,
+	rulesep=0pt,
+	numbers=left,
+}
+    
+\lstset{
+    breaklines=true,
+    style=framed,
+    escapeinside={<@}{@>},
+    morekeywords={void, int, public, private, class, protected, submodules, network, connections, const, init, int, bool, double, module, rewards, endrewards, endmodule},
+    basicstyle=\ttfamily,
+    keywordstyle=\bfseries\color{blue},
+        morecomment=[f][\color{green!30!black}][0]{/*},
+    morecomment=[l][\color{green!30!black}]{//},
+    label=queueemodel
+}
+
+
+
+\begin{figure}[!htb]            
+\begin{minipage}{16cm}
+\begin{lstlisting}[style=framed,%customc,
+	caption=PRISM Code for the Queue Player,
+ 	label=queueemodel]	
+module Queue
+ $b_{0}$: [INIT_VAL..MAX_VAL]  init EMPTY;
+ $b_{1}$: [INIT_VAL..MAX_VAL]  init EMPTY;
+ $bk$ : [KEY_0..KEY_0] init KEY_0;
+ i   :[0..QUEUE_MAX] init 0;
+ [enqueue] i<QUEUE_MAX -> (i'=mod(i+1,QUEUE_MAX))  &($b_{0}$'=(i=0)?$pld_{3}$:$b_{0}$) &($b_{1}$'=(i=1)?$pld_{3}$:$b_{1}$);
+ [dequeue] i>0 -> (i'=i-1)  &($b_{0}$'=(i=0)?EMPTY:$b_{0}$)  &($b_{1}$'=(i=1)?EMPTY:$b_{1}$); 
+endmodule
+\end{lstlisting}
+ \end{minipage}  
+\end{figure}
+
+The model, consisting of one producer (sensor), one queue, and one consumer (fog), can be accessed through the following link: \cite{edcc23} under reference \texttt{M2}. In the following section, we instantiate multiple queues and sensors to facilitate the exchange of messages through a use case.
+
+
+
+\subsection{Attacks modeling}
+\label{sec:threats:manif}
+
+In this section, we formalize the attack CAPEC-384 \cite{capec384} that can impact the messages exchanged between communicating entities, thereby affecting both the payload and the routing key. For each message $m$ we use the following notations:  $rk$ denotes the routing key of the message $m$, $rk_{x}$ denotes the erroneous routing key of the message $m$, $pld$ denotes the payload of the message $m$, and $pld_{x}$ denotes the erroneous payload of the message $m$.
+
+\emph{Tampering} \cite{shostack2014threat}  leads to the alteration of messages transmitted by the sender component through the communication port. Within the context of \emath{\mathcal{RQ}} system, ${pld}$ is altered during the message transfer. Considering the sensor player \emath{\mathcal{D}_{1}} and attacker player \emath{\mathcal{D}_{2}} where the exchange node manages the interaction modeled as \emath{\mathcal{D}_{3}}. When refining the rule (\ref{writing}), the outcomes of routing key tampering are expressed through rules \ref{rkSuccess} and \ref{rkFailure}. Specifically, rule \ref{rkSuccess} represents the successful tampering of the routing key, while rule \ref{rkFailure} represents the failure to tamper with the routing key.
+
+%\BH{refer in the text to \emph{rk Success} and \emph{rk Failure}}
+
+\begin{boxD}
+%\framedtext{
+	      \begin{equation}\label{rkSuccess} \frac{ \sset{\mathcal{D}_{1}}= l_{1}\gparrow{a!\gl{rk_{1},pld_{1}}}l'_{1} \wedge \sset{\mathcal{D}_{2}}= l_{2}\gparrow{b!\gl{rk_{x},pld_{2}} }l'_{2} \wedge
+         \sset{\mathcal{D}_{3}}= l_{3}\gparrow{a, b?\gl{rk_{3},pld_{3}}}_{p}l'_{3}       
+       } {  \langle l_{1},\ldots,l_{2},\ldots l_{3},\theta\rangle  \xrightarrow{a,b}_{p}\langle l'_{1},\ldots,l'_{2},\ldots,l'_{3},\theta'\rangle } \tag{\emph{rk Success}} \end{equation} where \emath{\theta':=\theta[rk_{3}=rk_{x},pld_{3}=pld_{2}]} and \emath{\mathcal{D}_{1}} is the sensor, \emath{\mathcal{D}_{2}} is the attacker. \emath{p} is the success rate of the attacker.
+
+	      \begin{equation}\label{rkFailure}\frac{ \sset{\mathcal{D}_{1}}= l_{1}\gparrow{a!\gl{rk_{1},pld_{1}}}l'_{1} \wedge \sset{\mathcal{D}_{2}}=  l_{2}\gparrow{b!\gl{rk_{x},pld_{2}} }l'_{2} \wedge
+         \sset{\mathcal{D}_{3}}= l_{3}\gparrow{a, b?\gl{rk_{3},pld_{3}}}_{1-p}l'_{3}       
+       } {  \langle l_{1},\ldots,l_{2},\ldots l_{3},\theta\rangle  \xrightarrow{a,b}_{1-p}\langle l'_{1},\ldots,l'_{2},\ldots,l'_{3},\theta'\rangle } \tag{\emph{rk Failure}} \end{equation} where \emath{\theta':=\theta[rk_{3}=rk_{1},pld_{3}=pld_{1}]} and \emath{\mathcal{D}_{1}} is the sensor, \emath{\mathcal{D}_{2}} is the attacker. \emath{1-p} is the failure rate of the attacker.
+\end{boxD}
+
+
+Since the model incorporates the stochastic behavior of the system, it accurately represents the success and failure of the attacker using a stochastic parameter \emath{p}. 
+
+% Add a reference to the learning frequencies algorithm presented in section ***
+
+This parameter enables us to effectively model the message loss of the sensor at the exchange level as a result of the attack. While we address the issue of routing key tampering, it is also necessary to model payload tampering caused by similar attacks. Then, the success and failure rules are expressed by the rules \ref{pld Success} and \ref{pld Failure}.
+
+
+\begin{boxD}
+%\framedtext{
+	      \begin{equation}\frac{ \sset{\mathcal{D}_{1}}= l_{1}\gparrow{a!\gl{rk_{1},pld_{1}}}l'_{1} \wedge \sset{\mathcal{D}_{2}}=  l_{2}\gparrow{b!\gl{rk_{2},pld_{x}} }l'_{2} \wedge
+        \sset{\mathcal{D}_{3}}=  l_{3}\gparrow{a, b?\gl{rk_{3},pld_{3}}}_{p}l'_{3}      
+       } {  \langle l_{1},\ldots,l_{2},\ldots l_{3},\theta\rangle  \xrightarrow{a,b}_{p}\langle l'_{1},\ldots,l'_{2},\ldots,l'_{3},\theta'\rangle } \label{pld Success} \tag{\emph{pld Success}} \end{equation} where \emath{\theta':=\theta[rk_{3}=rk_{1},pld_{3}=pld_{x}]} and \emath{\mathcal{D}_{1}} is the sensor, \emath{\mathcal{D}_{2}} is the attacker. \emath{p} is the success rate of the attacker.
+%}
+	      \begin{equation}\frac{\sset{\mathcal{D}_{1}}= l_{1}\gparrow{a!\gl{rk_{1},pld_{1}}}l'_{1} \wedge \sset{\mathcal{D}_{2}}= l_{2}\gparrow{b!\gl{rk_{2},pld_{x}} }l'_{2} \wedge
+        \sset{\mathcal{D}_{3}}=  l_{3}\gparrow{a, b?\gl{rk_{3},pld_{3}}}_{1-p}l'_{3}       
+       } {  \langle l_{1},\ldots,l_{2},\ldots l_{3},\theta\rangle  \xrightarrow{a,b}_{1-p}\langle l'_{1},\ldots,l'_{2},\ldots,l'_{3},\theta'\rangle } \label{pld Failure}  \tag{\emph{pld Failure}} \end{equation} where \emath{\theta':=\theta[rk_{3}=rk_{1},pld_{3}=pld_{1}]} and \emath{\mathcal{D}_{1}} is the sensor, \emath{\mathcal{D}_{2}} is the attacker. \emath{1-p} is the failure rate of the attacker.
+\end{boxD}
+
+Now, with the formal specification of attacks at the exchange, we can proceed to provide a projection onto the PRISM code. Before modeling the exchange module of the interaction system, we present in \fig{fig:attack:sensor} the attacker and producer players model. They are characterized by two channels (we employ the terminology used for the channeling system \cite{baierprinciples2008}): write and wait. The write channel is responsible for transmitting the produced value from the producer (i.e., attacker) to the exchange node. The writing and waiting operations are performed each round \emath{r}. 
+
+\noindent
+\begin{figure}[!htb]
+    \centering
+    \input{attackersensormodel}
+    \caption{Attacker and Sensor Models.}
+    \label{fig:attack:sensor}
+\end{figure} 
+
+
+The exchange system captures the interactions between producers (sensors) and attackers in the \lst{exchangemodel}, specifically focusing on the payload transfer. This is achieved through the utilization of two channels, namely $write_{1}$ and $write_{2}$. The success and failure rules, denoted as \ref{pld Success} and \ref{pld Failure}, are implemented through the PRISM commands found in lines 4-5. Additionally, players have the ability to enter a waiting mode, which is modeled using two channels, $wait_{1}$ and $wait_{2}$, implemented as actions in PRISM. In the case of waiting modes, the exchange module resets both internal binding keys and payload in line 6. However, if one of the players is available to transfer its payload, a non-probabilistic command is implemented in lines 7-8.
+
+\lstdefinestyle{framed}
+{
+	frame=lrb,         
+	mathescape,
+	numbers=left,
+	belowcaptionskip=-1pt,
+    xleftmargin=3em,
+		xrightmargin=0.01cm,
+    framexleftmargin=3em,
+	framexrightmargin=0pt,
+	framextopmargin=5pt,
+	framexbottommargin=5pt,
+	framesep=0pt,
+	rulesep=0pt,
+	numbers=left,
+}
+\lstset{
+    breaklines=true,
+    style=framed,
+    escapeinside={<@}{@>},
+    morekeywords={void, int, public, private, class, protected, submodules, network, connections, const, init, int, bool, double, module, rewards, endrewards, endmodule},
+    basicstyle=\ttfamily,
+    keywordstyle=\bfseries\color{blue},
+        morecomment=[f][\color{green!30!black}][0]{/*},
+    morecomment=[l][\color{green!30!black}]{//},
+    label=queueemodel
+}
+
+
+
+\begin{figure}[!htb]            
+\begin{minipage}{16.5cm}
+\begin{lstlisting}[style=framed,%customc,
+	caption=PRISM code for Exchange Module,
+ 	label=exchangemodel]	
+module Exchange
+$pld_{3}$  : [INIT_VAL..MAX_VAL] init EMPTY;
+$rk_{3}$ : [INIT_VAL..MAX_VAL] init EMPTY;
+[$write_{1}$, $write_{2}$] true  -> (1-$p$):($pld_{3}$'=$pld_{1}$)&($rk_{3}$'=$rk_{3}$)  +$p$:($pld_{3}$'=$pld_{2}$)&($rk_{3}$'=$rk_{2}$);
+[$wait_{1}$ , $wait_{2}$]  true -> ($pld_{3}$'=EMPTY) & ($rk_{3}$'=EMPTY);
+[$write_{1}$, $wait_{2}$ ]  true -> ($pld_{3}$'=$pld_{1}$) &  ($rk_{3}$'=$rk_{1}$ );
+[$wait_{1}$ , $write_{2}$]  true -> ($pld_{3}$'=$pld_{x}$) &  ($rk_{3}$'=$rk_{2}$ );
+endmodule
+\end{lstlisting}
+ \end{minipage}  
+\end{figure}
+
+\paragraph*{Remark}The definition of binding key tampering follows the same principle as payload tampering.
+

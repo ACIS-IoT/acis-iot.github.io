@@ -1,0 +1,392 @@
+\documentclass[3p,times,preprint,number,round]{elsarticle}
+%\documentclass[preprint,12pt]{elsarticle}
+
+\newcommand\hmmax{0}
+  \newcommand\bmmax{3}
+%\usepackage{algorithm2e}
+%\usepackage{algorithm}
+%\usepackage{algpseudocode}
+%\usepackage{algorithmic}
+ \usepackage{mathtools}
+\usepackage{makeidx}
+    \usepackage{float}
+    \usepackage{graphicx}
+\usepackage{makeidx}  % allows for indexgeneration
+\usepackage[english]{babel} % un troisième package
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{syntax}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{verbatim}
+%\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{courier}
+%\usepackage{mathrsfs}
+%\usepackage[authoryear]{natbib}
+%\usepackage{amsthm}
+\usepackage{amsthm}
+%\usepackage{nath}
+
+\usepackage{lmodern}
+%\usepackage{bm}
+\usepackage{tikz}
+%\usepackage[]{algorithm2e}
+%\usepackage{algorithm}
+
+
+%\usepackage{algorithm}   % For math symbols
+%\usepackage[noend]{algpseudocode}
+%\usepackage{algorithm2e}
+%\usepackage{algorithmic}
+\usepackage[ruled,lined,linesnumbered]{algorithm2e}
+%\usepackage{algorithm}
+%\usepackage{algorithmic}
+%\usepackage{algpseudocode}
+\usepackage[hyphens]{url}
+%\usepackage{breakurl}
+%\PassOptionsToPackage{hyphens}{url}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks,
+  citecolor= 	JungleGreen,
+  linkcolor= 	JungleGreen,
+  urlcolor= 	JungleGreen}
+  
+  \usepackage{tabularx}
+\usepackage{rotating}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+%\usepackage{amsmath,amsfonts,amssymb}
+%\usepackage{mathastext}
+\usepackage[bitstream-charter]{mathdesign}
+%\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\normalfont
+\usepackage{listings}     
+\usepackage{lstautogobble}  % Fix relative indenting
+\usepackage{color}          % Code coloring
+\usepackage{zi4}            % Nice font
+\definecolor{bluekeywords}{rgb}{0.13, 0.13, 1}
+\definecolor{greencomments}{rgb}{0, 0.5, 0}
+\definecolor{redstrings}{rgb}{0.9, 0, 0}
+\definecolor{graynumbers}{rgb}{0.5, 0.5, 0.5}
+\definecolor{forestgreen}{rgb}{0.0, 0.5, 0.0}
+
+\definecolor{commentgreen}{RGB}{2,112,10}
+\definecolor{eminence}{RGB}{108,48,130}
+\definecolor{weborange}{RGB}{255,165,0}
+\definecolor{frenchplum}{RGB}{129,20,83}
+
+\usepackage[hyphens]{url}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks,
+  citecolor= 	blue,
+  linkcolor= 	blue,
+  urlcolor= 	blue}
+    \usepackage{breakurl}
+    
+%% set the starting page if not 1
+%\firstpage{1}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{%
+    \colorbox{black}{\parbox{\dimexpr\textwidth-2\fboxsep}{\textbf{\textcolor{white}{#1#2#3}}}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+%% Give the name of the journal
+
+\usepackage{lineno}
+
+\usepackage{tikz}
+\usetikzlibrary{matrix,arrows.meta,arrows,automata,backgrounds}
+\tikzset{%
+  >={Latex[width=2mm,length=2mm]},
+  % Specifications for style of nodes:
+            base/.style = {rectangle, rounded corners, draw=black,
+                           minimum width=2cm, minimum height=1cm,
+                           text centered, font=\sffamily},
+  activityStarts/.style = {base, fill=blue!30},
+       startstop/.style = {base, fill=red!30},
+    activityRuns/.style = {base, fill=green!30},
+         process/.style = {base, minimum width=2.5cm, fill=orange!15,
+                           font=\ttfamily},
+}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+    \node[shape=circle, draw, inner sep=1pt, 
+        minimum height=12pt] (char) {#1};}}
+        \ttfamily
+
+\newcommand{\sensinact}{\texttt{sensi\textbf{N}act}}
+
+\newcommand{\ecircle}[1] {\textcircled{{\small #1}}}
+
+
+\newcommand{\fig}[1]{Figure \ref{#1}}
+
+\newcommand{\commenting}[1] {\textcolor{red}{#1}}
+
+\newcommand{\quot}[1] {``#1''}
+
+\newcommand{\emath}[1] { $#1$ }
+
+\newcommand{\emathtt}[1] { $\mathtt{#1}$ }
+
+\newcommand{\msym}[1] { $\mathscr{#1}$ }
+
+\newcommand{\alg}[1] {Algorithm \ref{#1}}
+
+\newcommand{\lst}[1] {Listing \ref{#1}}
+
+\newcommand{\ie}{i.e., }
+\newcommand{\eg}{e.g., }
+\newcommand{\thisrelation}{${\rm I\!R}$}
+
+\newtheorem{theorem}{Theorem}%[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{mydef}{Definition}
+\newtheorem{example}{Example}
+%\volume{00}
+\newcommand{\gparrow}[1] {\lhook\joinrel\xrightarrow{#1} }
+%\firstpage{1}
+\newcommand{\acisiot} {s\textbf{A}fety and se\textbf{C}ur\textbf{I}ty as\textbf{S}urrance for critical \textbf{IoT} systems}
+\journal{Elsevier}
+
+%\newcommand*\circled[1]{\tikz[baseline=(char.base)]{\node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\usepackage[many]{tcolorbox}  
+\usepackage{setspace}               % for LINE SPACING
+\usepackage{multicol}               % for MULTICOLUMNS
+
+  
+\usetikzlibrary{calc,shadows.blur}
+\def\llbracket{[\![}
+\def\rrbracket{]\!]}
+
+\newcommand{\sset}[1] {\llbracket #1 \rrbracket}
+\newtcolorbox{boxD}{
+    colback = gray!5!white, 
+    colframe = black, 
+    boxrule = 0pt, 
+    toprule = 3pt, % top rule weight
+    bottomrule = 3pt % bottom rule weight
+}
+
+\newtcolorbox{boxC}{
+    colback = blue!0!white,  % background color
+    boxrule = 0pt  % no borders
+}
+
+\newtcolorbox{boxF}{
+    colback = yellow!5!white,
+    enhanced,
+    boxrule = 1.5pt, 
+    colframe = white, % making the base for dash line
+    borderline = {1.1pt}{0pt}{main, dashed} % add "dashed" for dashed line
+}
+
+%\runauth{}
+%\jid{procs}
+\makeindex
+
+%\jnltitlelogo{\small Information Sciences}
+\normalsize
+
+\usepackage{amssymb}
+
+\setcitestyle{square}
+
+\SetSymbolFont{operators}   {normal}{OT1}{cmr} {m}{n}
+\SetSymbolFont{letters}     {normal}{OML}{cmm} {m}{it}
+\SetSymbolFont{symbols}     {normal}{OMS}{cmsy}{m}{n}
+\SetSymbolFont{largesymbols}{normal}{OMX}{cmex}{m}{n}
+\SetSymbolFont{operators}   {bold}  {OT1}{cmr} {bx}{n}
+\SetSymbolFont{letters}     {bold}  {OML}{cmm} {b}{it}
+\SetSymbolFont{symbols}     {bold}  {OMS}{cmsy}{b}{n}
+\SetSymbolFont{largesymbols}{bold}  {OMX}{cmex}{m}{n}
+
+\SetMathAlphabet{\mathbf}{normal}{OT1}{cmr}{bx}{n}
+\SetMathAlphabet{\mathsf}{normal}{OT1}{cmss}{m}{n}
+\SetMathAlphabet{\mathit}{normal}{OT1}{cmr}{m}{it}
+\SetMathAlphabet{\mathtt}{normal}{OT1}{cmtt}{m}{n}
+\SetMathAlphabet{\mathbf}{bold}  {OT1}{cmr}{bx}{n}
+\SetMathAlphabet{\mathsf}{bold}  {OT1}{cmss}{bx}{n}
+\SetMathAlphabet{\mathit}{bold}  {OT1}{cmr}{bx}{it}
+\SetMathAlphabet{\mathtt}{bold}  {OT1}{cmtt}{m}{n}
+
+\newcommand\myeq{\stackrel{\mathclap{\footnotesize\mbox{def}}}{=}}
+
+\usepackage{enumitem}
+%\linenumbers
+
+\newcommand{\eclipse}[1] {\textcolor{eminence}{\texttt{\textbf{#1}}}}
+
+\newcommand{\gtext}[1] {\textcolor{forestgreen}{#1}}
+
+\newcommand{\keyw}[1] {\texttt{\textbf{#1}}}
+
+\newcommand{\gl}[1] {\langle {#1} \rangle}
+
+\newcommand\setItemnumber[1]{\setcounter{enumi}{\numexpr#1-1\relax}}
+
+\newcommand{\cmt}[1] {\textcolor{blue}{#1}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usetikzlibrary{calc,shadows.blur}
+\tcbuselibrary{skins}
+\newtcolorbox{resp}[2][]{%
+  enhanced jigsaw,
+  colback=gray!20!white,%
+  colframe=gray!80!black,
+  size=small,
+  boxrule=1pt,
+  title=#2,
+  halign title=flush center,
+  coltitle=black,
+  drop shadow=black!50!white,
+  attach boxed title to top left={xshift=1cm,yshift=-\tcboxedtitleheight/2,yshifttext=-\tcboxedtitleheight/2},
+  minipage boxed title=3cm,
+  boxed title style={%
+    colback=white,
+    size=fbox,
+    boxrule=1pt,
+    boxsep=2pt,
+    underlay={%
+      \coordinate (dotA) at ($(interior.west) + (-0.5pt,0)$);
+      \coordinate (dotB) at ($(interior.east) + (0.5pt,0)$);
+      \begin{scope}
+        \clip (interior.north west) rectangle ([xshift=3ex]interior.east);
+        \filldraw [white, blur shadow={shadow opacity=60, shadow yshift=-.75ex}, rounded corners=2pt] (interior.north west) rectangle (interior.south east);
+      \end{scope}
+      \begin{scope}[gray!80!black]
+        \fill (dotA) circle (2pt);
+        \fill (dotB) circle (2pt);
+      \end{scope}
+    },
+  },
+  #1,
+}
+
+
+\begin{document}
+
+\begin{frontmatter}
+
+%\dochead{}
+%Formalizing the Detection and Mitigation of Clock Deviation in Challenging Physical and Environmental Conditions for Synchronous and Asynchronous Communication Styles
+
+%\title{Security Risk Assessment of the RabbitMQ Protocol through Concurrent Stochastic Games}
+%\title{Security Risk Assessment of the RabbitMQ Broker using Concurrent Stochastic Games}
+
+%\title{\cmt{Rigorous Analysis of Learned Attack Patterns in RabbitMQ Broker with Concurrent Stochastic Games}}
+
+\title{\cmt{Rigorous Security Analysis of RabbitMQ Broker with Concurrent Stochastic Games}}
+
+% \author[aut2]{Abdelhakim Baouya\corref{cor1}}
+% \ead{abdelhakim.baouya@gmail.com}
+
+% \author[aut2]{Brahim Hamid}
+% \ead{brahim.hamid@irit.fr}
+
+% \author[aut4]{Levent Gürgen}
+% \ead{levent@kentyou.com}
+
+% \author[aut3]{Saddek Bensalem}
+% \ead{saddek.bensalem@univ-grenoble-alpes.fr}
+
+% \cortext[cor1]{Corresponding author at : University of Toulouse, IRIT, France}
+
+
+% \address[aut2]{University of Toulouse, IRIT, France}
+
+% \address[aut3]{Université Grenoble Alpes, VERIMAG, Grenoble, France}
+
+% \address[aut4]{Kentyou Company, France}
+
+\begin{abstract}
+Modern Internet of Things architectures encompass \cmt{various} computational logic and communication protocols. However, the security issues inherent in these systems pose significant risks, \cmt{especially at the device edges}. Addressing security threats on the \cmt{deployed communication edges} is imperative to ensure a robust and secure communication system. In this study, we propose an approach that utilizes the Concurrent Stochastic Game model (CSG) to specify the behavior of RabbitMQ \cmt{Broker} in the context of IoT systems precisely while considering potential data corruption attacks. For parametrizable evaluation, these attacks and their frequencies are learned. We implement the CSG model in \cmt{PRISM games} for automated analysis, leveraging reward Probabilistic Alternating Temporal Logic (rPATL) to model security requirements as game goals. Empirical validation of the work is presented via an industrial case study that shows how \cmt{data} corruption attacks can impact the sensed data in water dam infrastructure. \cmt{This assessment gives valuable insights into the RabbitMQ deployment at the edge.} 
+
+%To validate our approach, we investigate data corruption attacks targeting sensed data and examine its impact on payload routing and message loss for water dam infrastructure. 
+\end{abstract}
+
+\begin{keyword}
+Edge computing\sep Game Model\sep Security Threats \sep Formal methods.
+\end{keyword}
+\end{frontmatter}
+
+\tableofcontents
+
+\newpage
+
+\section{Introduction}
+
+\begin{sloppypar}
+\input{introduction}
+\end{sloppypar}
+
+\section{Background}
+\label{Preliminaries}
+\begin{sloppypar}
+\input{preliminaries}
+\end{sloppypar}
+
+\section{Approach}
+\label{Approach}
+\begin{sloppypar}
+\input{approach}
+\end{sloppypar}
+
+\section{Learning Attack Frequencies}
+\label{frequencies}
+\begin{sloppypar}
+\input{frequencies}
+\end{sloppypar}
+
+
+\section{RabbitMQ architecture and threats modeling}
+\label{rabbitmq}
+\begin{sloppypar}
+\input{threats}
+\end{sloppypar}
+
+
+
+\section{Experiments}\label{useCase}
+\label{sec:useCase}
+\begin{sloppypar}
+\input{usecase}
+\end{sloppypar}
+
+\section{Related work}
+\label{sec:rw}
+\begin{sloppypar}
+\input{works}
+\end{sloppypar}
+
+\section{Conclusion}\label{conclusion}
+\begin{sloppypar}
+\input{conclusion}
+\end{sloppypar}
+
+
+
+\subsection*{Acknowledgement}
+The research leading to the presented results was conducted within the research profile of \acisiot (ACIS-IoT), supported by the Centre National de la Recherche Scientifique (CNRS). The authors express their gratitude to the individuals involved in the European projects CPS4EU and BRAIN-IoT projects, acknowledging their valuable contributions and feedback.
+
+
+
+%\bibliographystyle{model1a-num-names}
+%\bibliographystyle{plainnat}
+%\bibliographystyle{model3-num-names}
+
+\bibliographystyle{elsarticle-num-names}
+\bibliography{references}
+
+
+\end{document}

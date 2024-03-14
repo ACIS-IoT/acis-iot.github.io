@@ -1,0 +1,67 @@
+
+Edge computing is a paradigm that decentralizes computational power, bringing it closer to the point of data generation, such as IoT devices (\cmt{sensors and actuators}). Unlike relying on a centralized cloud infrastructure, edge computing focuses on processing and analyzing data at or near the network edge, where it originates \cite{KHAN2019219}. However, \cmt{security} concerns have become significant in modern IoT systems \cite{baouya2022}. Insecure network connections pose risks such as data interception, unauthorized access, and tampering \cite{Hossein2023}. Hence, it is of utmost importance to identify and address these security concerns during the early stages of development \cite{Valentina2024, Brahim2018}. This underscores establishing precise semantic definitions for threats and attacks at the design phase.
+
+
+To develop new and innovative Edge Servers with specific functionalities, enterprise companies rely on (mainly open source) \quot{middleware} software \cite{ZHANG2021}, which needs to be enhanced with custom software components to implement multiple functions, including security, that add value compared to other edge servers on the market. Notably, middlewares have been tailored to process signals efficiently and route them from IoT sensors to nodes employing application-level protocols like Hypertext Transfer Protocol Secure (HTTPS) \cite{Prasenjit2019}. Beyond that, the literature shows recent advancements in developing appropriate protocols for \cmt{ edge core-side infrastructures (e.g., AMQP\footnote{\url{https://www.amqp.org/}}) facilitating device-edge communication (e.g., CoAP~\cite{coap})}. 
+
+Among the wide range of \cmt{brokers} available, RabbitMQ\footnote{\url{https://www.rabbitmq.com/}} stands out as a message queue middleware that facilitates asynchronous message communication. It leverages the capabilities of the Erlang language \cite{armstrong2013programming} to implement the Advanced Message Queuing Protocol (AMQP) adopted by reputable vendors such as JPMorgan, NASA, Red Hat, Google, IBM, VMware, Mozilla, and others.
+In this paper, we undertake a comprehensive analysis of the security of RabbitMQ architecture using formal methods. We employ the model checker PRISM-games to formalize and verify RabbitMQ as a Concurrent Stochastic Game (CSG)\cite{kwiatkowskaautomatic2021}, leveraging reward Probabilistic Alternating Temporal Logic (rPATL) \cite{hutchisonautomatic2012} to model security \cmt{properties} as game goals. To validate our work, we explore a set of potential attacks at two distinct levels of the protocol:  \emph{messages received} and \emph{queues}.   
+
+
+\subsection{Contributions} 
+To the best of our knowledge, RabbitMQ has not been examined for potential attacks within the context of a CSG formalism.  In the available literature, the research conducted by \cite{Li2020} primarily centers around examining functional properties employing UPPAAL \cite{behrmann2006uppaal}. Contrarily, studies conducted by \cite{Ionescu2015,Hong2018,Bagaskara2020,Rostanski2014}  primarily utilize simulation techniques to assess performance aspects pertaining to the deployed servers, encompassing scalability, memory usage, and throughput. Nevertheless, these studies do not incorporate the modeling of attacks within the system. The paper under consideration contributes significantly to the field by addressing this gap, with the main contributions summarized as follows:
+
+\begin{enumerate}
+    \item Formalizing RabbitMQ to comprehensively understand its communication \cmt{broker} behavior using operational semantics rules.
+
+    \item Formalizing the CAPEC-384 attack scenario using operational semantics rules.
+    
+    \item Developing an interpretation of the formal representation of RabbitMQ under attacks in the formalism of PRISM-games.
+    
+    \item Examining attacks in a use case scenario that addresses the deployment of RabbitMQ on a communication gateway.
+
+    
+\end{enumerate}
+
+By employing formal methods for studying attacks within the system, we provide valuable insights that enhance the understanding of the system's security aspects. The paper uses a set of abbreviations and references in Table \ref{tableOfacronyms}.
+
+%Presently, within enterprise companies, there is a multitude of open-source middleware that have gained significant adoption. One noteworthy firm in this domain is Kentyou\footnote{\url{http://kentyou.com/}}, which has flourished as a result of successful European and international projects. Kentyou's notable accomplishment includes the development of the Sensinact gateway, which exhibits the seamless translation of messages between various protocols. Notably, it has been tailored to process efficiently and route signals from IoT sensors to nodes employing application-level protocols like HTTPS. Moreover, the edge infrastructure encompasses a wide range of existing open-source protocols, including MQTT and CoAP (see deliverables \cite{sensinactref2024}).
+
+
+
+%To bolster the capabilities of the Sensinact gateway on the edge server, we undertake a comprehensive analysis of the RabbitMQ architecture utilizing formal methods. To accomplish this, we employ the model checker PRISM-games to formalize and verify RabbitMQ as a Concurrent Stochastic Game (CSG)\cite{kwiatkowskaautomatic2021}. Our research specifically targets potential attacks, including DoS (Denial of Service) and ARP Spoofing, at two distinct levels of the protocol: messages received and queues. 
+
+
+
+\begin{table}[h!]
+\centering
+
+\begin{tabular}{|m{1.50cm} l |} 
+\hline 
+ATL & Alternating Temporal Logic \\
+ARP & Address Resolution Protocol \\
+CAPEC & Common Attack Pattern Enumeration and Classification \\
+DDoS &  Distributed Denial of Service \\
+CTL & Computation Tree Logic \\
+CSG & Concurrent Stochastic Game \\
+ILP & Integer Linear Programming \\
+MC & Model Checking \\
+MDP & Markov Decision Process \\
+MITM & Man in the Middle \\
+PCTL & Probabilistic Computation Tree Logic \\
+rPATL & reward Probabilistic Alternating Temporal Logic \\
+SMC & Statistical Model Checking \\
+WL & Water Level \\
+WV & Water Volume \\ 
+RP & Rain Precipitation \\ 
+\hline 
+\end{tabular}
+\caption{A List of Acronyms Used in the Article.}
+\label{tableOfacronyms}
+\end{table}
+\normalsize
+
+\subsection{Outline} 
+
+
+The subsequent sections of this paper are organized as follows: In Section \ref{Preliminaries}, we \cmt{provide} preliminaries encompassing the Concurrent Stochastic Game (CSG) and PRISM-games language. Following that, in Section \ref{Approach}, we present the workflow of the study. Section \ref{frequencies} presents the flow for learning attack frequencies. In Section \ref{rabbitmq}, we employ CSG to model RabbitMQ and address security concerns. In Section \ref{sec:useCase}, we conduct an experiment within the context of IoT systems for the practical application of our approach. In Section \ref{discussion}, an extensive discussion is presented, covering potential enhancements in scalability and outlining strategies for mitigating attacks. Section \ref{sec:rw} \cmt{summarizes} the related works, highlighting their contributions and limitations. Lastly, in Section \ref{conclusion}, we conclude our work by \cmt{outlining} the key findings and proposing directions for future research.
