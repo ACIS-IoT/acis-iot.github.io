@@ -181,9 +181,9 @@ q: [-1..10] init -1; //phase parameters
 
 endmodule
 
-// reward structure for player Human
-rewards "Desynchronized" 
 
+rewards "Desynchronized" 
+	// Reward for being in the Desynchronized state (driftD1 or driftD2)
 	[driftD1] true :  1;
 	[driftD2] true :  1;
 endrewards
