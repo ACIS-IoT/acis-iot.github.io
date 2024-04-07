@@ -1,0 +1,133 @@
+//PRISM Model for synchronous communication
+
+
+csg
+
+const int scenario; // 0 or 1 or 2
+
+//The model evaluates the southbound bridges sensitive to attacks
+// The communication model relies on synchronized communication style
+// The model is checked with properties file properties.pctl
+
+player p1 WLSensor endplayer
+player p2 RPSensor endplayer
+player p3 WVSensor endplayer
+
+//attackers
+player p5 Attacker endplayer
+
+
+const int EMPTY = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = ATTACK_VAL;
+const int MAX_VAL = 1;
+
+//Attaque frequency
+const double freq =scenario=0?0:(scenario=1 ? 0.2 : 0.8);
+
+//Edge Processing Cycles
+const int u ;
+
+const int rounds; // number of rounds
+
+module rounds
+
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
+
+// Attacker Model
+module Attacker
+
+  // Attacker state variable with possible values (replace with specific values)
+  ATTACKER_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+
+  // Tampering state (true/false)
+  tamper: bool init false;
+
+  // Active state (true/false)
+  active: bool init false;
+
+  // Initial activation (INIT_AT)
+  [INIT_AT] active=false -> (1-freq): (tamper'=false) & (active'=true) + freq: (tamper'=true) & (active'=true);
+
+  // Sensor reading (SENSOR_AT_R) - attacker becomes inactive
+  [SENSOR_AT_R] active=true -> (active'=false)&(tamper'=false);
+
+endmodule
+
+
+
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL
+ // Always true transition - indicates successful data transfer for water level
+  [SENSOR_WL_R, SENSOR_AT_R] true -> true;
+endmodule
+
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP
+  // Always true transition - indicates successful data transfer for rain precipitation
+  [SENSOR_RP_R, SENSOR_AT_R] true -> true;
+endmodule
+
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV
+
+  // Always true transition - indicates successful data transfer for water volume
+  // (Note: Transition allows any integer value for SENSOR_WV_R)
+  [SENSOR_WV_R, SENSOR_AT_R] true -> true;
+endmodule
+
+
+
+//energy consumption model during attacks
+//rewards "incorrect"
+
+	//[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 1;
+	//[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 1;
+	//[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 1;
+
+//endrewards
+
+//energy consumption model during attacks
+rewards "energy"
+
+	[SENSOR_WL_R, SENSOR_AT_R]  tamper=true: 2.1514 * u + 4.142;
+	[SENSOR_RP_R, SENSOR_AT_R]  tamper=true: 2.1514 * u + 4.142;
+	[SENSOR_WV_R, SENSOR_AT_R]  tamper=true: 2.1514 * u + 4.142;
+endrewards
+
+//energy consumption model during attacks
+rewards "totalenergy"
+
+	[SENSOR_WL_R, SENSOR_AT_R]  true: 2.1514 * u + 4.142;
+	[SENSOR_RP_R, SENSOR_AT_R]  true: 2.1514 * u + 4.142;
+	[SENSOR_WV_R, SENSOR_AT_R]  true: 2.1514 * u + 4.142;
+endrewards
+
+
+//Water Level Model
+module WLSensor
+  wl_pl: [INIT_VAL..MAX_VAL] init 1;
+[SENSOR_WL_R]    true  -> true;
+endmodule
+
+
+//RP Level Model
+module RPSensor
+  rp_pl: [INIT_VAL..MAX_VAL]init 1;
+[SENSOR_RP_R]    true   -> true;
+endmodule
+
+
+//WV Level Model
+module WVSensor
+  wv_pl: [INIT_VAL..MAX_VAL] init 1;
+[SENSOR_WV_R]    true   -> true;
+endmodule
+

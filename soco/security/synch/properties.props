@@ -1,0 +1,7 @@
+const int T;
+const int M;
+
+<<p1,p2,p3,p5>>R{"energy"}min=? [ F r=rounds ]
+
+<<p1,p2,p3,p5>>R{"energy"}max=? [ F r=rounds ]
+

@@ -1,0 +1,280 @@
+//PRISM Model for synchronous communication
+
+
+csg
+
+const int scenario; // 0 or 1 or 2
+const int MAX_QUEUE=3; 
+//The model evaluates the southbound bridges sensitive to attacks
+// The communication model relies on synchronized communication style
+// The model is checked with properties file properties.pctl
+
+player p1 WLSensor endplayer
+player p2 RPSensor endplayer
+player p3 WVSensor endplayer
+
+//attackers
+player p5 Attacker endplayer
+player p6 Attacker2 endplayer
+player p7 Attacker3 endplayer
+player p8 Attacker4 endplayer
+
+const int EMPTY = -1;
+const int ATTACK_VAL = -2;
+const int INIT_VAL = ATTACK_VAL;
+const int MAX_VAL = 1;
+
+//Attaque frequency
+const double freq =scenario=0?0:(scenario=1 ? 0.2 : 0.8);
+
+//Edge Processing Cycles
+const int u ;
+
+const int rounds; // number of rounds
+
+module rounds
+
+	r : [0..rounds]; // current time-step
+	
+	[] r<rounds -> (r'=r+1);
+	[] r=rounds -> true;
+	
+endmodule
+
+
+// Attacker Model
+module Attacker
+
+  // Attacker state variable with possible values (replace with specific values)
+  ATTACKER_PL: [INIT_VAL..MAX_VAL] init ATTACK_VAL;
+
+  // Tampering state (true/false)
+  tamper: bool init false;
+
+  // Active state (true/false)
+  active: bool init false;
+
+  // Initial activation (INIT_AT)
+  [INIT_AT] active=false -> (1-freq): (tamper'=false) & (active'=true) + freq: (tamper'=true) & (active'=true);
+
+  // Sensor reading (SENSOR_AT_R) - attacker becomes inactive
+  [SENSOR_AT_R] active=true -> (active'=false)&(tamper'=false);
+
+endmodule
+
+
+// Malicious Entity Model (Second Attacker)
+module Attacker2
+
+  // Tampering state (true/false)
+  tamper2: bool init false;
+
+  // Active state (true/false)
+  active2: bool init false;
+
+  // Initial activation (INIT_AT)
+  [INIT_AT2] active2=false -> (1-freq): (tamper2'=false) & (active2'=true) + freq: (tamper2'=true) & (active2'=true);
+
+  // Sensor reading (SENSOR_AT_R) - malicious entity becomes inactive
+  [SENSOR_AT2_R] active2=true -> (active2'=false)&(tamper2'=false);
+
+endmodule
+
+// Malicious Entity Model (Second Attacker)
+module Attacker3
+
+  // Tampering state (true/false)
+  tamper3: bool init false;
+
+  // Active state (true/false)
+  active3: bool init false;
+
+  // Initial activation (INIT_AT)
+  [INIT_AT3] active3=false -> (1-freq): (tamper3'=false) & (active3'=true) + freq: (tamper3'=true) & (active3'=true);
+
+  // Sensor reading (SENSOR_AT_R) - malicious entity becomes inactive
+  [SENSOR_AT3_R] active3=true -> (active3'=false)&(tamper3'=false);
+
+endmodule
+
+// Malicious Entity Model (Second Attacker)
+module Attacker4
+
+  // Tampering state (true/false)
+  tamper4: bool init false;
+
+  // Active state (true/false)
+  active4: bool init false;
+
+  // Initial activation (INIT_AT)
+  [INIT_AT4] active4=false -> (1-freq): (tamper4'=false) & (active4'=true) + freq: (tamper4'=true) & (active4'=true);
+
+  // Sensor reading (SENSOR_AT_R) - malicious entity becomes inactive
+  [SENSOR_AT4_R] active4=true -> (active4'=false)&(tamper4'=false);
+
+endmodule
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL
+  // Number of incorrect values in the queue
+  wl_incorrectValue: [0..MAX_QUEUE] init 0;
+ // Always true transition - indicates successful data transfer for water level
+  [SENSOR_WL_R, SENSOR_AT_R] wl_incorrectValue < MAX_QUEUE ->(wl_incorrectValue' = wl_incorrectValue + (!tamper ? 1 : 0)) ; 
+endmodule
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL2
+  // Number of incorrect values in the queue
+  wl2_incorrectValue: [0..MAX_QUEUE] init 0;
+ // Always true transition - indicates successful data transfer for water level
+  [SENSOR_WL_R, SENSOR_AT2_R] wl2_incorrectValue < MAX_QUEUE ->(wl2_incorrectValue' = wl2_incorrectValue + (!tamper2 ? 1 : 0)) ; 
+endmodule
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL3
+  // Number of incorrect values in the queue
+  wl3_incorrectValue: [0..MAX_QUEUE] init 0;
+ // Always true transition - indicates successful data transfer for water level
+  [SENSOR_WL_R, SENSOR_AT3_R] wl3_incorrectValue < MAX_QUEUE ->(wl3_incorrectValue' = wl3_incorrectValue + (!tamper3 ? 1 : 0)) ; 
+endmodule
+
+//SouthBoundBridge Connector Water Level
+module SouthBoundEdgeBridgeWL4
+  // Number of incorrect values in the queue
+  wl4_incorrectValue: [0..MAX_QUEUE] init 0;
+ // Always true transition - indicates successful data transfer for water level
+  [SENSOR_WL_R, SENSOR_AT4_R] wl4_incorrectValue < MAX_QUEUE ->(wl4_incorrectValue' = wl4_incorrectValue + (!tamper ? 1 : 0)) ; 
+endmodule
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP
+  // Number of incorrect values in the queue
+  rp_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for rain precipitation
+  [SENSOR_RP_R, SENSOR_AT_R] rp_incorrectValue < MAX_QUEUE ->(rp_incorrectValue' = rp_incorrectValue + (!tamper ? 1 : 0)) ; 
+endmodule
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP2
+  // Number of incorrect values in the queue
+  rp2_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for rain precipitation
+  [SENSOR_RP_R, SENSOR_AT2_R] rp2_incorrectValue < MAX_QUEUE ->(rp2_incorrectValue' = rp2_incorrectValue + (!tamper2 ? 1 : 0)) ; 
+endmodule
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP3
+  // Number of incorrect values in the queue
+  rp3_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for rain precipitation
+  [SENSOR_RP_R, SENSOR_AT3_R] rp3_incorrectValue < MAX_QUEUE ->(rp3_incorrectValue' = rp3_incorrectValue + (!tamper3 ? 1 : 0)) ; 
+endmodule
+//SouthBoundBridge Connector Rain Precipitation
+module SouthBoundEdgeBridgeRP4
+  // Number of incorrect values in the queue
+  rp4_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for rain precipitation
+  [SENSOR_RP_R, SENSOR_AT4_R] rp4_incorrectValue < MAX_QUEUE ->(rp4_incorrectValue' = rp4_incorrectValue + (!tamper4 ? 1 : 0)) ; 
+endmodule
+////////////////////////////////////////////////////////////////
+
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV
+  // Number of incorrect values in the queue
+  wv_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for water volume
+  [SENSOR_WV_R, SENSOR_AT_R] wv_incorrectValue < MAX_QUEUE ->(wv_incorrectValue' = wv_incorrectValue + (!tamper ? 1 : 0)) ; 
+endmodule
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV2
+  // Number of incorrect values in the queue
+  wv2_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for water volume
+  [SENSOR_WV_R, SENSOR_AT2_R] wv2_incorrectValue < MAX_QUEUE ->(wv2_incorrectValue' = wv2_incorrectValue + (!tamper2 ? 1 : 0)) ; 
+endmodule
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV3
+  // Number of incorrect values in the queue
+  wv3_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for water volume
+  [SENSOR_WV_R, SENSOR_AT3_R] wv3_incorrectValue < MAX_QUEUE ->(wv3_incorrectValue' = wv3_incorrectValue + (!tamper3 ? 1 : 0)) ; 
+endmodule
+//SouthBoundBridge Connector Water Volume
+module SouthBoundEdgeBridgeWV4
+  // Number of incorrect values in the queue
+  wv4_incorrectValue: [0..MAX_QUEUE] init 0;
+  // Always true transition - indicates successful data transfer for water volume
+  [SENSOR_WV_R, SENSOR_AT4_R] wv4_incorrectValue < MAX_QUEUE ->(wv4_incorrectValue' = wv4_incorrectValue + (!tamper2 ? 1 : 0)) ; 
+endmodule
+////////////////////////////////////////////////////////////////
+//energy consumption model during attacks
+//rewards "incorrect"
+
+	//[READ_WV,SENSOR_WV_SUBSCRIBE] BUFFER_WV=ATTACKER_PL: 1;
+	//[READ_RP,SENSOR_RP_SUBSCRIBE] BUFFER_RP=ATTACKER_PL: 1;
+	//[READ_WL,SENSOR_WL_SUBSCRIBE] BUFFER_WL=ATTACKER_PL: 1;
+
+//endrewards
+
+//energy consumption model during attacks
+rewards "energy"
+
+	[SENSOR_WL_R, SENSOR_AT_R]  tamper=true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT_R]  tamper=true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT_R]  tamper=true: (2.1514 * u *wv_incorrectValue + 4.142);
+
+	[SENSOR_WL_R, SENSOR_AT2_R]  tamper=true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT2_R]  tamper=true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT2_R]  tamper=true: (2.1514 * u *wv_incorrectValue + 4.142);
+
+	[SENSOR_WL_R, SENSOR_AT3_R]  tamper=true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT3_R]  tamper=true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT3_R]  tamper=true: (2.1514 * u *wv_incorrectValue + 4.142);
+
+	[SENSOR_WL_R, SENSOR_AT4_R]  tamper=true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT4_R]  tamper=true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT4_R]  tamper=true: (2.1514 * u *wv_incorrectValue + 4.142);
+endrewards
+
+//energy consumption model during attacks
+rewards "totalenergy"
+
+	[SENSOR_WL_R, SENSOR_AT_R]  true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT_R]  true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT_R]  true: (2.1514 * u *wv_incorrectValue + 4.142);
+
+	[SENSOR_WL_R, SENSOR_AT2_R]  true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT2_R]  true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT2_R]  true: (2.1514 * u *wv_incorrectValue + 4.142);
+
+	[SENSOR_WL_R, SENSOR_AT3_R]  true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT3_R]  true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT3_R]  true: (2.1514 * u *wv_incorrectValue + 4.142);
+
+	[SENSOR_WL_R, SENSOR_AT4_R]  true: (2.1514 * u *wl_incorrectValue + 4.142);
+	[SENSOR_RP_R, SENSOR_AT4_R]  true: (2.1514 * u *rp_incorrectValue + 4.142);
+	[SENSOR_WV_R, SENSOR_AT4_R]  true: (2.1514 * u *wv_incorrectValue + 4.142);
+endrewards
+
+
+//Water Level Model
+module WLSensor
+  wl_pl: [INIT_VAL..MAX_VAL] init 1;
+[SENSOR_WL_R]    true  -> true;
+endmodule
+
+
+//RP Level Model
+module RPSensor
+  rp_pl: [INIT_VAL..MAX_VAL]init 1;
+[SENSOR_RP_R]    true   -> true;
+endmodule
+
+
+//WV Level Model
+module WVSensor
+  wv_pl: [INIT_VAL..MAX_VAL] init 1;
+[SENSOR_WV_R]    true   -> true;
+endmodule
+

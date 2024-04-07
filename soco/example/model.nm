@@ -2,41 +2,72 @@
 
 csg
 
+  // Player 1: ProducerConsumer1
+  player p1 ProducerConsumer1
+  endplayer
+
+  // Player 2: ProducerConsumer2
+  player p2 ProducerConsumer2
+  endplayer
 
 
-player p1 ProducerConsumer1 endplayer
+ // Module for ProducerConsumer1
+  module ProducerConsumer1
 
-player p2 ProducerConsumer2 endplayer
+    // Shared variable (buffer) with initial value 0 (empty)
+    s1 : [0..1] init 0;
+
+    // Write action (w1) - keeps buffer full (s1=1)
+    [w1] s1=0 -> (s1'=1);
+
+    // Read action (r1) - no change to buffer (stays empty)
+    [r1] s1=0 -> (s1'=0);
+
+    // Reset action (reset1) - sets buffer to empty (s1=0)
+    [reset1] s1=0 -> (s1'=0);
+
+  endmodule
 
 
-module ProducerConsumer1
+  // Connector module to manage buffer access
+  module connector
 
-	s1 : [0..1] init 0;
-	[w1] s1=0 -> (s1'=0);
-	[r1] s1=0 -> (s1'=0);
-	[reset1] s1=0 -> (s1'=0);
+    // Shared variable to track access attempts (a) with initial value 0 (no attempts)
+    a : [0..2]init 0;
 
-endmodule
+    // Shared variable to track winner (win) with initial value 0 (no winner)
+    win : [0..2]init 0;
 
+    // Both players try to write (w1,w2) - conflict (a=1, win=0) 
+    [w1,w2] a=0 -> (a'=1) & (win'=0);
 
-module connector
+    // Both players try to read (r1,r2) - conflict (a=1, win=0) 
+    [r1,r2] a=0 -> (a'=1) & (win'=0);
 
-	win : [0..2]init 0;
-	a : [0..2]init 0;
-	
-	[w1,w2] a=0 -> (a'=1) & (win'=0);
-        [r1,r2] a=0 -> (a'=1) & (win'=0);
+    // Reset actions (reset1,reset2) - clear access attempts and winner (a=0, win=0)
+    [reset1,reset2] a=1 | a=2 | a=3 -> (a'=0) & (win'=0);
 
-	[reset1,reset2] a=1 | a=2 | a=3 -> (a'=0) & (win'=0);
+    // Player 1 reads (r1), Player 2 writes (w2) - successful read (a=2, win=2)
+    [r1,w2] a=0 -> (a'=2) & (win'=2);
 
-	[r1,w2] a=0 -> (a'=2) & (win'=2);
-	[w1,r2] a=0 -> (a'=3) & (win'=1);
+    // Player 1 writes (w1), Player 2 reads (r2) - successful write (a=3, win=1)
+    [w1,r2] a=0 -> (a'=3) & (win'=1);
 
-endmodule
+  endmodule
 
-module ProducerConsumer2
-	s2 : [0..1] init 0;
-	[w2] s2=0 -> (s2'=0);
-	[r2] s2=0 -> (s2'=0);
-	[reset2] s2=0 -> (s2'=0);
-endmodule
+  // Module for ProducerConsumer2
+  module ProducerConsumer2
+
+    // Shared variable (buffer) with initial value 0 (empty) - same as ProducerConsumer1
+    s2 : [0..1] init 0;
+
+    // Write action (w2) - keeps buffer full (s2=1)
+    [w2] s2=0 -> (s2'=1);
+
+    // Read action (r2) - no change to buffer (stays empty)
+    [r2] s2=0 -> (s2'=0);
+
+    // Reset action (reset2) - sets buffer to empty (s2=0)
+    [reset2] s2=0 -> (s2'=0);
+
+  endmodule
