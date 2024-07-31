@@ -4,6 +4,7 @@
 #include <sstream>
 #include <random>
 #include <fstream>
+
     using namespace omnetpp;
 
     /**
@@ -17,6 +18,7 @@
         cMessage*  INIT;
         cMessage*  LIFT;
         cMessage*  TRANSMIT;
+        std::ofstream outfile;
         const  std::string csvfilename ="log.csv";
         double driftRate; // drift rate in seconds
         int H;
@@ -27,6 +29,8 @@
         int sameCount;
         const int  sameThreshold=2;
         double lambda;  // Rate parameter for the exponential distribution
+        double listen_input;
+        double sendTimeDouble;
         std::default_random_engine generator;
         std::exponential_distribution<double> distribution;
         std::vector<std::string> extractSubstrings(const std::string& inputString);
@@ -56,6 +60,7 @@
 
     void Drone::initialize()
     {
+
         EV_INFO << "Module instance name: " << getFullName() << endl;
         driftRate = par("driftRate");
         restart();
@@ -76,8 +81,23 @@
                 sameCount=0;
             }
         }else{
+            listen_input = simTime().dbl();
+
+            listen_input= listen_input-sendTimeDouble;
+
+            std::ofstream file("send_times.txt", std::ios::app);
+            if (file.is_open()) {
+                std::string str = std::to_string(listen_input);
+                std::string result = "COMMUNICATION LAG FOR DRONE GATEWAY : " + str;
+                file << result << endl;
+                file.close();
+            } else {
+                // Handle file open error
+                EV_ERROR << "Error opening file: " << csvfilename.c_str() << endl;
+            }
+
             //LISTEN
-            writeDataToCSV("LISTEN",std::string(getFullName()),H,PLD);
+           // writeDataToCSV("LISTEN",std::string(getFullName()),H,PLD);
             // Call the function to extract substrings
                std::vector<std::string> extractedSubstrings = extractSubstrings( msg->getName());
                std::string full = extractedSubstrings[1];
@@ -139,8 +159,13 @@
 
         std::string result = std::string("TRANSMIT/") + std::string(std::to_string(H))+"/" + std::string(std::to_string(pld));
         TRANSMIT = new cMessage(result.c_str());
+
+        sendTimeDouble = simTime().dbl();
+
+
+
         send(TRANSMIT, "DRONE_TRANSMIT"); // send out the message
-        writeDataToCSV("TRANSMIT",std::string(getFullName()),H,pld);
+        //writeDataToCSV("TRANSMIT",std::string(getFullName()),H,pld);
     }
 
     /**
@@ -151,7 +176,7 @@
         std::string result = std::string("LIFT/")+ std::string(std::to_string(H)) + "/" +std::string(std::to_string(pld));
         LIFT = new cMessage(result.c_str());
         send(LIFT, "CRANE_LIFT"); // send out the message
-        writeDataToCSV("LIFT",std::string(getFullName()),H,pld);
+        //writeDataToCSV("LIFT",std::string(getFullName()),H,pld);
     }
     /**
      * reschedule the send

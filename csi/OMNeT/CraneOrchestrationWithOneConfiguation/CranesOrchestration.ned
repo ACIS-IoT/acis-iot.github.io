@@ -14,7 +14,7 @@ simple Drone
 simple InBox
 {
     parameters:
-        @display("i=block/source");
+        @display("i=device/antennatower");
         @icon(images/drone.png);
 
     gates:
@@ -26,6 +26,7 @@ simple InBox
 
 simple Crane
 {
+    @display("i=crane");
     gates:
         input CRANE_LIFT;
 }
@@ -36,7 +37,7 @@ simple Crane
 //
 network CranesOrchestration
 {
-    @display("bgb=962,1203");
+    @display("bgb=965.60004,637.296");
     submodules:
         Drone0: Drone {
             @display("p=120.700005,456.246;is=-");

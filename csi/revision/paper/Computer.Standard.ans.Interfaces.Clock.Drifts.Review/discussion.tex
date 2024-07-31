@@ -1,0 +1,24 @@
+
+%In this section, we discuss the validity of our research results and the potential applications of the proposed approach.
+
+
+%\subsection{Beyond model checking}
+
+In this work, we demonstrate the application of formal methods, specifically model checking with PRISM models, for verifying clock synchronization in a drone communication system. In Section~\ref{communication}, we formalize semantic rules for managing clock deviation, which can be implemented in various formalisms like PRISM, UPPAAL \cite{behrmann2006uppaal}, and BIP \cite{basurigorous2011}. We implemented the protocol properties using PCTL, ensuring messages are transmitted from drones to the gateway and received even under conditions of clock deviation. 
+
+
+%We have showcased the application of formal methods, particularly model checking of PRISM models, in verifying clock synchronization. We have implemented the protocol properties using PCTL. These properties encompassed the transmission of messages from drones to the gateway, ensuring that the messages are received even in the presence of deviation. In Section \ref{communication}, we formalize semantics rules about the clock deviation that can be implemented in different formalisms such as UPPAAL or BIP. 
+
+
+The verification process becomes hard due to the number of variables and their configuration, as portrayed in section \ref{evaluation}. This is attributed to algorithms explicitly designed for verifying a kind of liveness properties \cite{alur2015}. In scenarios like this, abstraction can prove advantageous in reducing computational overhead, yet it may result in a loss of model meaning. To overcome the limitations of model-checking engines, we employ OMNet++ to model the system accurately and subsequently construct PRISM models that are learned using PDT. These models incorporate statistical observations from the streaming simulation dataset, closely resembling the initial PRISM model regarding verification results.
+
+The experimental results indicate thanks to the learning process, model checking can effectively verify even large-scale early synchronization detection. Using simulation (OMNeT++) and verification during the initial wireless engineering phases can identify potential side effects much earlier in the design process. This not only allows for timely detection but also leads to a considerable reduction in project costs and duration. Also, Due to the automation and absence of manual abstractions, this transformation could be integrated into robust model-based design frameworks such as Eclipse Papyrus \cite{papyrus}. The artifact's compatibility with such frameworks allows for effortless incorporation, enhancing the overall efficiency and effectiveness of the modeling process.
+
+
+\cmt{The OMNeT++ model for the orchestration of lifting tasks is designed with flexibility in mind. Unlike traditional approaches, designers are not required to build the entire model from scratch. Instead, they can leverage pre-designed in OMNeT++ components editor like cranes, drones, and gateways, allowing them to focus on the specific lifting orchestration logic. This is made possible by the robust C/C++ programming environment, which ensures efficient message marshaling and unmarshalling between the physical components.}
+
+
+\cmt{As the literature discusses, our proposed operational semantics rules provide a unified approach to capturing observed resynchronization. This reusability translates to their applicability across diverse communication protocols susceptible to clock drift. Indeed, our study demonstrates their successful generalization to two distinct formalisms: OMNeT++ and PRISM. OMNeT++ operates at the low level of communication protocols using C/C++ constructs for validation practices. In contrast, PRISM is dedicated to modeling and analysis at a high level for verification practices.}
+
+
+\cmt{The paper proposes an approach applicable to various synchronization algorithms. This approach can assist engineers in certifying their protocols and ensuring their correctness. Scalability, a major challenge in modeling communication protocols, is investigated. We employed learning algorithms to capture communication traces and build formal models to address scalability. This design allows collaboration between users from diverse backgrounds. In contrast, automation offers the advantage of requiring only the designer's input to gain modeling insights.}

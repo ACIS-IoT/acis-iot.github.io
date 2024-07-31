@@ -1,4 +1,5 @@
 #include <string.h>
+#include <fstream>
 #include <string>
 #include <omnetpp.h>
 #include <sstream>
@@ -18,6 +19,7 @@
         cMessage*  LISTEN;
         cMessage*  INIT;
         int full;
+        const  std::string csvfilename ="gateway.csv";
         std::array<int, ARRAY_SIZE> timeArray;
         std::array<int, ARRAY_SIZE> pldArray;
         std::pair<std::string, std::string> extractSubstrings(const std::string& inputString);
@@ -26,6 +28,7 @@
         std::exponential_distribution<double> distribution;
         void broadcast(int H, int pld);
         void restart();
+        void writeDataToCSV(int D1H, int D2H, int SYNCH);
    protected:
         // The following redefined virtual function holds the algorithm.
         virtual void initialize() override;
@@ -82,6 +85,7 @@
                 int rclk= (timeArray[0]+timeArray[1])/2;
                 broadcast(rclk, pldArray[1]);
                 full=0;
+                writeDataToCSV(timeArray[0],timeArray[1],rclk);
             }
         }
 
@@ -123,4 +127,18 @@
         substrings.second = inputString.substr(secondSlashPos + 1);
 
         return substrings;
+    }
+
+    // Function to write data to a CSV file
+    void InBox::writeDataToCSV(int D1H, int D2H, int SYNCH) {
+
+        std::string result = std::string(simTime().str()) + ","+ std::string(std::to_string(D1H))+"," +std::string(std::to_string(D2H))+"," + std::string(std::to_string(SYNCH));
+        std::ofstream file(csvfilename.c_str(), std::ios::app);
+        if (file.is_open()) {
+            file << result << endl;
+            file.close();
+        } else {
+            // Handle file open error
+            EV_ERROR << "Error opening file: " << csvfilename.c_str() << endl;
+        }
     }
