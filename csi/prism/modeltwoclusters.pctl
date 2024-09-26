@@ -1,5 +1,0 @@
-const int T;
-
-// Check the sybchronization using clocks variables on two clusters
-P=? [ G (!(C1D1H=C1D2H)&!(C2D1H=C2D2H)=>(F ((C1D1H=C1D2H)&(C2D1H=C2D2H)))) ]
-

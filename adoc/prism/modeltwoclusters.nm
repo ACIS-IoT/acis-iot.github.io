@@ -1,0 +1,72 @@
+dtmc
+
+// PRISM code for decision trees in three clusters
+
+// Define a constant value for "not defined" class
+const int NOTDEFINED = -1;
+
+
+// Cluster 1
+const double C1D1H; // Hours for Drone 1 in Cluster 1
+const double C1D2H; // Hours for Drone 2 in Cluster 1
+
+// Cluster 2
+const double C2D1H; // Hours for Drone 1 in Cluster 2
+const double C2D2H; // Hours for Drone 2 in Cluster 2
+
+// **Module for Decision Tree in Cluster 1**
+module GeneratedDecisiontreeCluster1 
+
+  // State variable for Cluster 1, initialized to "not defined"
+  CL1 : [NOTDEFINED..3] init 0;
+
+  // Rule 1: If both drones in Cluster 1 have low readings...
+  [rule1_1] C1D2H <= 97.0 & C1D1H <= 94.0 ->
+    (0.007751937984496124) : (CL1' = 0) // Update state to 0 with probability 0.00775
+    + (0.9922480620155039) : (CL1' = NOTDEFINED); // Stay in "not defined" with probability 0.9922
+
+  // Rule 2: If only C1D2H (Drone 2) has a low reading...
+  [rule2_1] C1D2H <= 97.0 & C1D1H > 94.0 ->
+    (0.09090909090909091) : (CL1' = 1) // Update state to 1 with probability 0.0909
+    + (0.9090909090909091) : (CL1' = NOTDEFINED); // Stay in "not defined" with probability 0.9090
+
+  // Rule 3: If only C1D1H (Drone 1) has a low reading...
+  [rule3_1] C1D2H > 97.0 & C1D1H <= 94.0 ->
+    (0.1) : (CL1' = 1) // Update state to 1 with probability 0.1
+    + (0.9) : (CL1' = NOTDEFINED); // Stay in "not defined" with probability 0.9
+
+  // Rule 4: If both drones in Cluster 1 have high readings...
+  [rule4_1] C1D2H > 97.0 & C1D1H > 94.0 ->
+    (0.007246376811594203) : (CL1' = 2) // Update state to 2 with probability 0.0072
+    + (0.9927536231884058) : (CL1' = NOTDEFINED); // Stay in "not defined" with probability 0.9927
+endmodule
+
+// **Module for Decision Tree in Cluster 2**
+module GeneratedDecisiontreeCluster2
+
+// State variable for Cluster 2, initialized to "not defined"
+CL2 : [NOTDEFINED..3] init 0;
+
+// Rule 1: If both drones in Cluster 2 have low readings (≤ 97 hours)...
+[rule1_2] C2D2H <= 97.0 & C2D1H <= 94.0 ->
+    (0.007751937984496124) : (CL2' = 0)  // Update state to 0 with probability 0.00775
+    + (0.9922480620155039) : (CL2' = NOTDEFINED);  // Stay in "not defined" with probability 0.9922
+
+// Rule 2: If only C2D2H (Drone 2) has a low reading (≤ 97 hours)...
+[rule2_2] C2D2H <= 97.0 & C2D1H > 94.0 ->
+    (0.09090909090909091) : (CL2' = 1)  // Update state to 1 with probability 0.0909
+    + (0.9090909090909091) : (CL2' = NOTDEFINED);  // Stay in "not defined" with probability 0.9090
+
+// Rule 3: If only C2D1H (Drone 1) has a low reading (≤ 94 hours)...
+[rule3_2] C2D2H > 97.0 & C2D1H <= 94.0 ->
+    (0.1) : (CL2' = 1)  // Update state to 1 with probability 0.1
+    + (0.9) : (CL2' = NOTDEFINED);  // Stay in "not defined" with probability 0.9
+
+// Rule 4: If both drones in Cluster 2 have high readings (> 94 hours)...
+[rule4_2] C2D2H > 97.0 & C2D1H > 94.0 ->
+    (0.007246376811594203) : (CL2' = 2)  // Update state to 2 with probability 0.0072
+    + (0.9927536231884058) : (CL2' = NOTDEFINED);  // Stay in "not defined" with probability 0.9927
+
+endmodule
+
+

@@ -1,4 +1,0 @@
-const int T;
-
-P=? [ G (      !(C1D1H=C1D2H) & !(C2D1H=C2D2H) &  !(C3D1H=C3D2H)   =>   (F (  (C1D1H=C1D2H) & (C2D1H=C2D2H) & (C3D1H=C3D2H)           )  )        ) ]
-

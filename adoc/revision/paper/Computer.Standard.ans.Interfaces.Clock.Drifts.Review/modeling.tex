@@ -1,0 +1,69 @@
+In this section, we will explore two types of communication styles and examine how they intervene to manage clock deviation.
+
+\subsection{Communication styles}
+
+\subsubsection{Synchronous communication style}
+In synchronous communication, the sender and receiver are synchronized and operate in a lockstep fashion, ensuring that messages are sent and received at \emph{predefined time intervals}. In the example of \fig{fig:conne:synch}, there are two modules: a consumer and a producer. The consumer generates a message, and the producer consumes it upon reception. In this case, synchronization is achieved using the send/receive rule of \fig{fig:prism:rules}.
+
+\noindent
+\begin{figure*}[!htb]
+    \centering
+    \input{pcsynchro}
+    \caption{Synchronous Model.}
+    \label{fig:conne:synch}
+\end{figure*} 
+
+
+ 
+\subsubsection{Asynchronous communication style}
+Asynchronous communication refers to a communication mechanism where the sender and receiver operate independently of each other. In this type of communication, there is no strict timing or coordination between the sender and receiver. Instead, messages are sent and received asynchronously, allowing each component to operate at its own pace. In the example shown in \fig{fig:conne:asynch}, there are two modules: a consumer and a producer. The consumer generates a message and pushes it to a FIFO buffer, which is managed by another module. When the buffer is full, it is consumed by the consumer module.
+
+\noindent
+\begin{figure*}[!htb]
+    \centering
+    \input{pcasynch}
+    \caption{Asynchronous Model.}
+    \label{fig:conne:asynch}
+\end{figure*} 
+
+
+The FIFO module includes buffer variables, namely \emath{b_{0}} and \emath{b_{n}}, as well as an index \emath{i} that is incremented each time new data is received and stored in \emath{b_{i}}. Furthermore, the asynchronous communication style must adhere to the following rules: \ref{Enqueue} and \ref{Dequeue}.
+
+
+\begin{boxD}
+%\framedtext{
+	      \begin{equation} \label{Enqueue}\frac{ x_{0} \xrightarrow{g:enqueue!v} {x'_{0}} \wedge \theta_{0} \models g_{0} \wedge x_{1} \xrightarrow{g:enqueue?v} {x'_{1}} \wedge \theta_{1} \models g_{1}} { \langle x_{0},\ldots,x_{i}, \ldots,x_{n},\theta\rangle \xrightarrow{a}\langle x_{0},\ldots,x'_{i}, \ldots,x_{n},\theta'\rangle  } \tag{Enqueue} \end{equation} where \emath{\theta':=\theta[ b_{i}:=v]}
+%}
+	      \begin{equation}\label{Dequeue}\frac{ x_{2} \xrightarrow{g:dequeue!v{x'_{2}}} \wedge \theta_{2} \models g_{2} \wedge x_{3} \xrightarrow{g:dequeue?v} {x'_{3}} \wedge \theta_{3} \models g_{3} } { \langle x_{0},\ldots,x_{i}, \ldots,x_{n},\theta\rangle \xrightarrow{a}_{\lambda}\langle x_{0},\ldots,x'_{i}, \ldots,x_{n},\theta'\rangle  } \tag{Dequeue} \end{equation} where \emath{\theta':=\theta[ v:=b_{i}]}
+\end{boxD}
+
+\subsection{Clock deviation and mitigation}
+\subsubsection{Clock deviation}
+In the absence of synchronization, device clocks operate autonomously without coordination. Each component sends its data at its own clock frequency without acknowledgment of a reference clock. Considering \fig{fig:conne:drift}, the device propagates its data at the clock instant \emath{t_{c}+1} with probability \emath{\lambda_{1}} or the device propagates the data at the clock instant \emath{t_{c} + t_{drift}} with probability \emath{\lambda_{2}}, where \emath{t_{drift}} represents the additional elapsed time since the last propagation of internal data by the device. The corresponding rule for clock drifting is portrayed by the rule \ref{unsynch}.
+
+\noindent
+\begin{figure*}[!htb]
+    \centering
+    \input{driftexample}
+    \caption{Clock Deviation.}
+    \label{fig:conne:drift}
+\end{figure*} 
+\begin{boxD}
+%\framedtext{
+	      \begin{equation} \label{unsynch}\frac{ s_{i} \xrightarrow{g:\tau}_{\lambda_{2}} {s'_{i}} \wedge \theta_{0} \models g_{0} } { \langle s_{i}, \ldots,\theta\rangle \xrightarrow{\tau}_{\lambda_{2}}\langle s'_{i}, \ldots\theta'\rangle}   \tag{\emph{Clock drift}} \end{equation} where \emath{\theta':=\theta[ t_{c}:=t_{c}+t_{drift}]}
+%}
+	      \begin{equation}\label{synch}\frac{ \sset{s_{i} \xrightarrow{g:dequeue!v}s'_{i}} \wedge \sset{s_{j} \xrightarrow{g:dequeue?t_{c}} {s'_{j}}}  \wedge \sset{s_{k} \xrightarrow{g:dequeue?t_{c}} {s'_{k}}} \wedge \theta \models g_{i} \wedge g_{j} \wedge g_{k} } { \langle s_{i},\ldots,s_{j}, \ldots,s_{k},\theta\rangle \xrightarrow{a}_{\lambda}\langle s'_{i},\ldots,s'_{j}, \ldots,s'_{k}, \ldots,\theta'\rangle  } \tag{\emph{Synchronized Clock}} \end{equation} where \emath{\theta':=\theta[ t_{c}:=v]}
+\end{boxD}
+\subsubsection{Clock deviation mitigation}
+
+Clock drift mitigation consists of specifying an intermediary component or coordinator that resets the internal clock to the average of the clocks received from devices as asserted by \cite{WebsterBDFM18}. In the proposed approach, the coordinator collects all clocks using the FIFO principle, as defined in the asynchronous message passing discussed in the previous subsections (using \emph{enqueue} port to store clocks in variables). Once the clocks are collected, an averaging calculation is performed. Finally, the new clock value is sent back to the devices accordingly, as depicted by the operational semantics rule \ref{synch}. The state variables \emath{s_{i}}, \emath{s_{j}}, and \emath{s_{k}} refer to the FIFO states and devices states, respectively.
+ \noindent
+\begin{figure*}[!htb]
+    \centering
+    \input{driftexamplesynch}
+    \caption{Clock Deviation Mitigation.}
+    \label{fig:conne:drift:syncro}
+\end{figure*} 
+
+
+

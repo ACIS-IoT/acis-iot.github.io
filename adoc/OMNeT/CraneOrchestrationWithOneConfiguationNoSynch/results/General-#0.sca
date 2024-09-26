@@ -1,0 +1,71 @@
+version 3
+run General-0-20231107-18:38:17-176533
+attr configname General
+attr datetime 20231107-18:38:17
+attr datetimef 20231107-183817
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsd ""
+attr iterationvarsf ""
+attr measurement ""
+attr network CranesOrchestration
+attr processid 176533
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+config image-path images
+config network CranesOrchestration
+config cmdenv-interactive true
+config record-eventlog true
+config **.recording true
+config **.recorder.moduleType "\"CSVRecorder\""
+config **.recorder.fileName "\"simulation.csv\""
+
+par CranesOrchestration.Drone0.DRONE_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Drone0.DRONE_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.Drone0.DRONE_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Drone1.DRONE_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Drone1.DRONE_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.Drone1.DRONE_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.DRONE0_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.DRONE0_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.DRONE0_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.DRONE1_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.DRONE1_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.DRONE1_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Drone0.CRANE_LIFT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Drone0.CRANE_LIFT.channel disabled false
+attr mutable ""
+par CranesOrchestration.Drone0.CRANE_LIFT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Drone1.CRANE_LIFT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Drone1.CRANE_LIFT.channel disabled false
+attr mutable ""
+par CranesOrchestration.Drone1.CRANE_LIFT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Drone0 typename "\"Drone\""
+par CranesOrchestration.Drone0 driftRate 0.4
+par CranesOrchestration.Drone1 typename "\"Drone\""
+par CranesOrchestration.Drone1 driftRate 0.5
+par CranesOrchestration.Gateway typename "\"InBox\""
+par CranesOrchestration.Crane0 typename "\"Crane\""
+par CranesOrchestration.Crane1 typename "\"Crane\""
+par CranesOrchestration typename "\"CranesOrchestration\""
+
