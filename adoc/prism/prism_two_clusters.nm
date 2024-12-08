@@ -1,0 +1,361 @@
+dtmc
+
+
+const int sameThreshold =1;
+
+const int height;
+
+const int  MAXH=15;
+
+const int  MAX_DRONES=2;
+
+const int  NEXT_BROADCAST=5;
+
+const int H1=1;
+
+const int H2=1;
+
+const double d1proba;
+const double d2proba;
+const double D3proba;
+const double D4proba;
+
+module D1
+
+D1cycleLength : [0..15] init 13;
+
+D1refractoryPeriod : [0..MAXH] init 6;
+
+D1nextBroadcast : [0..MAXH] init NEXT_BROADCAST;
+
+D1H : [0..MAXH] init H1;
+
+D1Pld : [0..height] init 0;
+
+D1sameCount : [0..2] init 0;
+
+s: [-1..10] init -1; //phase parameters
+
+[D1_STATUS_LISTENING] s=-1 & listen1 -> (s'=0);
+
+//Phase 1 : listening to the messages 
+
+[D1_CHECK_PARAMETER] s=0 & D1H > D1refractoryPeriod -> (s'=1);
+[D1_CHECK_PARAMETER_NOT] s=0 & !(D1H > D1refractoryPeriod) -> (s'=1);
+
+//Phase 1 : case : check equivalent pld
+
+[D1_SAME_COUNT] s=1 & D1Pld=MSG_PLD & D1sameCount<2 -> (s'=2) & (D1sameCount'=D1sameCount+1);
+
+//Phase 3: send  payload  to the 
+
+[D1_SEND_COMMAND] s=2 -> (s'=3);
+
+//Phase 4: SENSING
+
+[D1_SENSING] s=3 -> (s'=7) & (D1Pld'=height);
+
+//Phase 1: case : D1Pld>MSGPLD
+
+[D1_ELSE_SAME_COUNT] s=1 & D1Pld>MSG_PLD  -> (s'=5) & (D1Pld'=MSG_PLD);
+
+//Phase 1: case : D1Pld<MSGPLD
+
+[D1_ELSE_ELSE_SAME_COUNT] s=1 & D1Pld<MSG_PLD  -> (s'=5);
+
+//Phase 5: trasmit h and pld to inbox
+
+[D1_TRANSMIT_TO_INBOX] s=5  -> (s'=7);
+
+//if not listenning 
+
+[D1_TRANSMIT_TO_INBOX_NOT_LISTENING] s=-1 & !listen1 &  ((D1H=D1nextBroadcast)  | ( (D1H=mod(D1nextBroadcast+D1refractoryPeriod,D1cycleLength)) & D1sameCount<sameThreshold)) -> (s'=5) & (D1sameCount'=0) ;
+
+[D1_COUNTING] s=-1 & !listen1 &  !((D1H=D1nextBroadcast)  | ( (D1H=mod(D1nextBroadcast+D1refractoryPeriod,D1cycleLength)) & D1sameCount<sameThreshold)) -> (s'=7)  ;
+
+
+//Phase 7: 
+
+//Phase 7: case D1H=D1cycleLength
+[D1_CHECK_CYCLE_LENGTH] (s=7) & D1H=D1cycleLength -> (s'=-1) & (D1H'=0) & (D1sameCount'=0);
+
+//Phase 7: case D1H  =/= D1cycleLength
+[D1_NO_CHECK_CYCLE_LENGTH] (s=7) & D1H!=D1cycleLength & D1H<MAXH-1-> (1-d1proba):(s'=-1) &(D1H'=D1H+1)+d1proba:(s'=8) &(D1H'=D1H+2);
+
+[driftD1] s=8 -> (s'=-1);
+
+endmodule
+
+
+module InBOX
+
+MSG_PLD1 : [0..height] init 0;
+MSG_H1 : [0..MAXH] init 0;
+
+MSG_PLD2 : [0..height] init 0;
+MSG_H2 : [0..MAXH] init 0;
+
+MSG_PLD : [0..height] init 0;
+MSG_H : [0..MAXH] init 0;
+
+listen1: bool init false;
+listen2: bool init false;
+
+cpt: bool init false;
+
+in : [0..MAX_DRONES] init 0;
+
+[D1_TRANSMIT_TO_INBOX] listen1=false -> (listen1'=true) & (MSG_H1'=D1H) & (MSG_PLD1'=D1Pld);
+
+[D2_TRANSMIT_TO_INBOX] listen2=false -> (listen2'=true) & (MSG_H2'=D2H) & (MSG_PLD2'=D2Pld);
+
+[MID] !cpt & listen1 & listen2  & MSG_H<MAXH & MSG_PLD<height -> (cpt'=true) & (MSG_H'=ceil((MSG_H2+MSG_H1)/MAX_DRONES)) & (MSG_PLD'=ceil((MSG_PLD2+MSG_PLD1)/MAX_DRONES));
+
+[D1_STATUS_LISTENING]  cpt & listen1 ->  (listen1'=false)  ;
+
+[D2_STATUS_LISTENING]  cpt & listen2 ->  (listen2'=false);
+endmodule
+
+
+module D2
+
+D2cycleLength : [0..MAXH] init 13;
+
+D2refractoryPeriod : [0..MAXH] init 6;
+
+D2nextBroadcast : [0..MAXH] init NEXT_BROADCAST;
+
+D2H : [0..MAXH] init H2;
+
+D2Pld : [0..height] init 0;
+
+D2sameCount : [0..2] init 0;
+
+q: [-1..10] init -1; //phase parameters
+
+[D2_STATUS_LISTENING] q=-1  & listen2  -> (q'=0);
+
+//Phase 1 : listening to the messages 
+
+[D2_CHECK_PARAMETER] q=0 & D2H > D2refractoryPeriod -> (q'=1);
+[D2_CHECK_PARAMETER_NOT] q=0 & !(D2H > D2refractoryPeriod) -> (q'=1);
+
+//Phase 1 : case : check equivalent pld
+
+[D2_SAME_COUNT] q=1 & D2Pld=MSG_PLD & D2sameCount<2 -> (q'=2) & (D2sameCount'=D2sameCount+1);
+
+//Phase 3: send  payload  to the 
+
+[D2_SEND_COMMAND] q=2 -> (q'=3);
+
+//Phase 4: SENSING
+
+[D2_SENSING] q=3 -> (q'=7) & (D2Pld'=height);
+
+//Phase 1: case : D2Pld>MSGPLD
+
+[D2_ELSE_SAME_COUNT] q=1 & D2Pld>MSG_PLD  -> (q'=5) & (D2Pld'=MSG_PLD);
+
+//Phase 1: case : D2Pld<MSGPLD
+
+[D2_ELSE_ELSE_SAME_COUNT] q=1 & D2Pld<MSG_PLD  -> (q'=5);
+
+//Phase 5: trasmit h and pld to inbox
+
+[D2_TRANSMIT_TO_INBOX] q=5  -> (q'=7);
+
+//if not listenning 
+
+[D2_TRANSMIT_TO_INBOX_NOT_LISTENING] q=-1 & !listen2 &  ((D2H=D2nextBroadcast)  | ( (D2H=mod(D2nextBroadcast+D2refractoryPeriod,D2cycleLength)) & D2sameCount<sameThreshold)) -> (q'=5) & (D2sameCount'=0) ;
+
+[D2_COUNTING] q=-1 & !listen2 &  !((D2H=D1nextBroadcast)  | ( (D2H=mod(D2nextBroadcast+D2refractoryPeriod,D2cycleLength)) & D2sameCount<sameThreshold)) -> (q'=7)  ;
+
+
+//Phase 7: 
+
+//Phase 7: case D2H=D2cycleLength
+[D2_CHECK_CYCLE_LENGTH] (q=7) & D2H=D2cycleLength -> (D2H'=0) & (D2sameCount'=0);
+
+//Phase 7: case D2H  =/= D2cycleLength
+[D2_NO_CHECK_CYCLE_LENGTH] (q=7) & D2H!=D2cycleLength & D2H<MAXH-1-> (1-d2proba):(q'=-1) &(D2H'=D2H+1)+d2proba:(q'=8) &(D2H'=D2H+2);
+
+[driftD2] q=8 -> (q'=-1);
+
+endmodule
+///////////////////////////////////////////////////
+
+
+module D3
+
+D3cycleLength : [0..15] init 13;
+
+D3refractoryPeriod : [0..MAXH] init 6;
+
+D3nextBroadcast : [0..MAXH] init NEXT_BROADCAST;
+
+D3H : [0..MAXH] init H1;
+
+D3Pld : [0..height] init 0;
+
+D3sameCount : [0..2] init 0;
+
+s1: [-1..10] init -1; //phase parameters
+
+[D3_STATUS_LISTENING] s1=-1 & listen1 -> (s1'=0);
+
+//Phase 1 : listening to the messages 
+
+[D3_CHECK_PARAMETER] s1=0 & D3H > D3refractoryPeriod -> (s1'=1);
+[D3_CHECK_PARAMETER_NOT] s1=0 & !(D3H > D3refractoryPeriod) -> (s1'=1);
+
+//Phase 1 : case : check equivalent pld
+
+[D3_SAME_COUNT] s1=1 & D3Pld=MSG_PLD & D3sameCount<2 -> (s1'=2) & (D3sameCount'=D3sameCount+1);
+
+//Phase 3: send  payload  to the 
+
+[D3_SEND_COMMAND] s1=2 -> (s1'=3);
+
+//Phase 4: SENSING
+
+[D3_SENSING] s1=3 -> (s1'=7) & (D3Pld'=height);
+
+//Phase 1: case : D3Pld>MSGPLD
+
+[D3_ELSE_SAME_COUNT] s1=1 & D3Pld>MSG_PLD  -> (s1'=5) & (D3Pld'=MSG_PLD);
+
+//Phase 1: case : D3Pld<MSGPLD
+
+[D3_ELSE_ELSE_SAME_COUNT] s1=1 & D3Pld<MSG_PLD  -> (s1'=5);
+
+//Phase 5: trasmit h and pld to inbox
+
+[D3_TRANSMIT_TO_INBOX] s1=5  -> (s1'=7);
+
+//if not listenning 
+
+[D3_TRANSMIT_TO_INBOX_NOT_LISTENING] s1=-1 & !listen1 &  ((D3H=D3nextBroadcast)  | ( (D3H=mod(D3nextBroadcast+D3refractoryPeriod,D3cycleLength)) & D3sameCount<sameThreshold)) -> (s1'=5) & (D3sameCount'=0) ;
+
+[D3_COUNTING] s1=-1 & !listen1 &  !((D3H=D3nextBroadcast)  | ( (D3H=mod(D3nextBroadcast+D3refractoryPeriod,D3cycleLength)) & D3sameCount<sameThreshold)) -> (s1'=7)  ;
+
+
+//Phase 7: 
+
+//Phase 7: case D3H=D3cycleLength
+[D3_CHECK_CYCLE_LENGTH] (s1=7) & D3H=D3cycleLength -> (s1'=-1) & (D3H'=0) & (D3sameCount'=0);
+
+//Phase 7: case D3H  =/= D3cycleLength
+[D3_NO_CHECK_CYCLE_LENGTH] (s1=7) & D3H!=D3cycleLength & D3H<MAXH-1-> (1-D3proba):(s1'=-1) &(D3H'=D3H+1)+D3proba:(s1'=8) &(D3H'=D3H+2);
+
+[driftD3] s1=8 -> (s1'=-1);
+
+endmodule
+
+
+module InBOX2
+
+MSG_PLD3 : [0..height] init 0;
+MSG_H3 : [0..MAXH] init 0;
+
+MSG_PLD4 : [0..height] init 0;
+MSG_H4 : [0..MAXH] init 0;
+
+MSG_PLD_1 : [0..height] init 0;
+MSG_H_1 : [0..MAXH] init 0;
+
+listen1_1: bool init false;
+listen2_1: bool init false;
+
+cpt_1: bool init false;
+
+in_1 : [0..MAX_DRONES] init 0;
+
+[D3_TRANSMIT_TO_INBOX] listen1_1=false -> (listen1_1'=true) & (MSG_H3'=D3H) & (MSG_PLD3'=D3Pld);
+
+[D4_TRANSMIT_TO_INBOX] listen2_1=false -> (listen2_1'=true) & (MSG_H4'=D4H) & (MSG_PLD4'=D4Pld);
+
+[MID_1] !cpt_1 & listen1_1 & listen2_1  & MSG_H_1<MAXH & MSG_PLD_1<height -> (cpt_1'=true) & (MSG_H_1'=ceil((MSG_H3+MSG_H4)/MAX_DRONES)) & (MSG_PLD_1'=ceil((MSG_PLD4+MSG_PLD3)/MAX_DRONES));
+
+[D3_STATUS_LISTENING]  cpt_1 & listen1_1 ->  (listen1_1'=false)  ;
+
+[D4_STATUS_LISTENING]  cpt_1 & listen2_1 ->  (listen2_1'=false);
+endmodule
+
+
+module D4
+
+D4cycleLength : [0..MAXH] init 13;
+
+D4refractoryPeriod : [0..MAXH] init 6;
+
+D4nextBroadcast : [0..MAXH] init NEXT_BROADCAST;
+
+D4H : [0..MAXH] init H2;
+
+D4Pld : [0..height] init 0;
+
+D4sameCount : [0..2] init 0;
+
+q1: [-1..10] init -1; //phase parameters
+
+[D4_STATUS_LISTENING] q1=-1  & listen2  -> (q1'=0);
+
+//Phase 1 : listening to the messages 
+
+[D4_CHECK_PARAMETER] q1=0 & D4H > D4refractoryPeriod -> (q1'=1);
+[D4_CHECK_PARAMETER_NOT] q1=0 & !(D4H > D4refractoryPeriod) -> (q1'=1);
+
+//Phase 1 : case : check equivalent pld
+
+[D4_SAME_COUNT] q1=1 & D4Pld=MSG_PLD & D4sameCount<2 -> (q1'=2) & (D4sameCount'=D4sameCount+1);
+
+//Phase 3: send  payload  to the 
+
+[D4_SEND_COMMAND] q1=2 -> (q1'=3);
+
+//Phase 4: SENSING
+
+[D4_SENSING] q1=3 -> (q1'=7) & (D4Pld'=height);
+
+//Phase 1: case : D4Pld>MSGPLD
+
+[D4_ELSE_SAME_COUNT] q1=1 & D4Pld>MSG_PLD  -> (q1'=5) & (D4Pld'=MSG_PLD);
+
+//Phase 1: case : D4Pld<MSGPLD
+
+[D4_ELSE_ELSE_SAME_COUNT] q1=1 & D4Pld<MSG_PLD  -> (q1'=5);
+
+//Phase 5: trasmit h and pld to inbox
+
+[D4_TRANSMIT_TO_INBOX] q1=5  -> (q1'=7);
+
+//if not listenning 
+
+[D4_TRANSMIT_TO_INBOX_NOT_LISTENING] q1=-1 & !listen2 &  ((D4H=D4nextBroadcast)  | ( (D4H=mod(D4nextBroadcast+D4refractoryPeriod,D4cycleLength)) & D4sameCount<sameThreshold)) -> (q1'=5) & (D4sameCount'=0) ;
+
+[D4_COUNTING] q1=-1 & !listen2 &  !((D4H=D3nextBroadcast)  | ( (D4H=mod(D4nextBroadcast+D4refractoryPeriod,D4cycleLength)) & D4sameCount<sameThreshold)) -> (q1'=7)  ;
+
+
+//Phase 7: 
+
+//Phase 7: case D4H=D4cycleLength
+[D4_CHECK_CYCLE_LENGTH] (q1=7) & D4H=D4cycleLength -> (D4H'=0) & (D4sameCount'=0);
+
+//Phase 7: case D4H  =/= D4cycleLength
+[D4_NO_CHECK_CYCLE_LENGTH] (q1=7) & D4H!=D4cycleLength & D4H<MAXH-1-> (1-D4proba):(q1'=-1) &(D4H'=D4H+1)+D4proba:(q1'=8) &(D4H'=D4H+2);
+
+[driftD4] q1=8 -> (q1'=-1);
+
+endmodule
+
+
+
+rewards "Desynchronized" 
+	// Reward for being in the Desynchronized state (driftD1 or driftD2)
+	[driftD1] true :  1;
+	[driftD2] true :  1;
+	[driftD3] true :  1;
+	[driftD4] true :  1;
+endrewards
+
+

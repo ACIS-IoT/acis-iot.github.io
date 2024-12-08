@@ -1,0 +1,68 @@
+dtmc
+
+
+const double p;
+
+module RP
+
+s1: [0..3] init 0;
+
+[produceS1]    s1=0 -> (s1'=1);
+[AnomalyS1]  s1=0-> true;
+[ResetR1]    qr1=2 -> true;  
+endmodule
+
+module DeviceRP
+qr1: [0..3] init 0;
+h1: [0..100] init 0;
+[AnomalyS1]     qr1=0 ->   (qr1'=1);
+[         ]     qr1=1 & h1<90 -> p:(qr1'=2)&(h1'=h1+2)+(1-p):(qr1'=3)&(h1'=h1+1);
+[driftD1]       qr1=2 ->   (qr1'=1);
+[ResetS1]       qr1=3 ->   (qr1'=0);
+endmodule
+
+module WL
+
+s2: [0..3] init 0;
+
+[produceS2]  s2=0 -> (s2'=1);
+[AnomalyS2]  s2=0-> true;
+[ResetS2]    qr2=2 -> true;  
+endmodule
+
+module DeviceWL
+qr2: [0..3] init 0;
+h2: [0..100] init 0;
+[AnomalyS2]     qr2=0 ->   (qr2'=1);
+[         ]     qr2=1 & h2<90 -> p:(qr2'=2)&(h2'=h2+2)+(1-p):(qr2'=3)&(h2'=h2+1);
+[driftD2]       qr2=2 ->   (qr2'=1);
+[ResetS2]       qr2=3 ->   (qr2'=0);
+endmodule
+
+
+module WV
+
+s3: [0..3] init 0;
+
+[produceS3]    s3=0 -> (s3'=1);
+[AnomalyS3]  s3=0-> true;
+[ResetS3]    qr3=2 -> true;  
+endmodule
+
+module DeviceWV
+qr3: [0..3] init 0;
+h3: [0..100] init 0;
+[AnomalyS3]     qr3=0 ->   (qr3'=1);
+[         ]     qr3=1 & h3<90 -> p:(qr3'=2)&(h3'=h3+2)+(1-p):(qr3'=3)&(h3'=h3+1);
+[driftD3]       qr3=2 ->   (qr3'=1);
+[ResetS3]       qr3=3 ->   (qr3'=0);
+endmodule
+
+rewards "Desynchronized" 
+	// Reward for being in the Desynchronized state (driftD1 or driftD2)
+	[driftD1] true :  1;
+	[driftD2] true :  1;
+	[driftD3] true :  1;
+endrewards
+
+

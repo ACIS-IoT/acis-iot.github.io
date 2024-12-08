@@ -1,0 +1,58 @@
+dtmc
+
+
+const double p;
+
+module Robot1
+
+r1_x: [0..10] init 0;
+r1_y: [0..10] init 0;
+
+[MoveR1Right]r1_x<10 -> (r1_x'=r1_x+1);
+[MoveR1Left] r1_x>0  -> (r1_x'=r1_x-1);
+[MoveR1Up]   r1_y<10 -> (r1_y'=r1_y+1);
+[MoveR1Down] r1_y>0  -> (r1_y'=r1_y-1);
+[AnomalyR1]  r1_y= r2_y | r1_x= r2_x-> true;
+[ResetR1]    qr1=2 -> true;  
+endmodule
+
+module DeviceRobot1
+qr1: [0..3] init 0;
+h1: [0..5] init 0;
+[AnomalyR1]     qr1=0 ->   (qr1'=1);
+[         ]     qr1=1 & h1<3 -> p:(qr1'=2)&(h1'=h1+2)+(1-p):(qr1'=3)&(h1'=h1+1);
+[driftD1]       qr1=2 ->   (qr1'=1)& (h1'=0);
+[ResetR1]       qr1=3 ->   (qr1'=0)& (h1'=0);
+endmodule
+
+
+
+module Robot2
+
+r2_x: [0..10] init 0;
+r2_y: [0..10] init 0;
+
+[MoveR2Right]r2_x<10 -> (r2_x'=r2_x+1);
+[MoveR2Left] r2_x>0  -> (r2_x'=r2_x-1);
+[MoveR2Up]   r2_y<10 -> (r2_y'=r2_y+1);
+[MoveR2Down] r2_y>0  -> (r2_y'=r2_y-1);
+[AnomalyR2]  r1_y= r2_y | r1_x= r2_x-> true;
+[ResetR2]    qr2=2 -> true;  
+endmodule
+
+module DeviceRobot2
+qr2: [0..3] init 0;
+h2: [0..5] init 0;
+[AnomalyR2]     qr2=0 ->   (qr2'=1);
+[         ]     qr2=1 & h2<3 -> p:(qr2'=1)&(h2'=h2+2)+(1-p):(qr2'=3)&(h2'=h2+1);
+[driftD2]       qr2=2 ->   (qr2'=1)& (h2'=0);
+[ResetR2]       qr2=3 ->   (qr2'=0)& (h2'=0);
+endmodule
+
+rewards "Desynchronized" 
+	// Reward for being in the Desynchronized state (driftD1 or driftD2)
+	[driftD1] true :  1;
+	[driftD2] true :  1;
+endrewards
+
+

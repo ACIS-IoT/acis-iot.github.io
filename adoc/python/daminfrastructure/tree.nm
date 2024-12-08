@@ -1,0 +1,27 @@
+mdp 
+ 
+const int NOTDEFINED =-1;
+const double D1H;
+const double D2H;
+const double D3H;
+module GeneratedDeCLisiontree
+CL : [NOTDEFINED..17] init 0 ;
+[rule1] D1H<=5.5 & D1H<=1.5 & D3H<=0.5 -> (0.5):(CL'=0) +  (0.5): (CL'=NOTDEFINED);
+[rule2] D1H<=5.5 & D1H<=1.5 & D3H>0.5 -> (0.5):(CL'=1) +  (0.5): (CL'=NOTDEFINED);
+[rule3] D1H<=5.5 & D1H>1.5 & D2H<=3.5 & D1H<=3.5 & D2H<=2.5 -> (0.2):(CL'=2) +  (0.8): (CL'=NOTDEFINED);
+[rule4] D1H<=5.5 & D1H>1.5 & D2H<=3.5 & D1H<=3.5 & D2H>2.5 -> (1.0):(CL'=3) +  (0.0): (CL'=NOTDEFINED);
+[rule5] D1H<=5.5 & D1H>1.5 & D2H<=3.5 & D1H>3.5 -> (1.0):(CL'=3) +  (0.0): (CL'=NOTDEFINED);
+[rule6] D1H<=5.5 & D1H>1.5 & D2H>3.5 & D2H<=4.5 -> (1.0):(CL'=4) +  (0.0): (CL'=NOTDEFINED);
+[rule7] D1H<=5.5 & D1H>1.5 & D2H>3.5 & D2H>4.5 -> (1.0):(CL'=5) +  (0.0): (CL'=NOTDEFINED);
+[rule8] D1H>5.5 & D1H<=11.5 & D2H<=8.5 & D2H<=7.5 & D1H<=6.5 -> (1.0):(CL'=6) +  (0.0): (CL'=NOTDEFINED);
+[rule9] D1H>5.5 & D1H<=11.5 & D2H<=8.5 & D2H<=7.5 & D1H>6.5 -> (1.0):(CL'=7) +  (0.0): (CL'=NOTDEFINED);
+[rule10] D1H>5.5 & D1H<=11.5 & D2H<=8.5 & D2H>7.5 -> (0.5):(CL'=8) +  (0.5): (CL'=NOTDEFINED);
+[rule11] D1H>5.5 & D1H<=11.5 & D2H>8.5 & D1H<=9.5 -> (1.0):(CL'=9) +  (0.0): (CL'=NOTDEFINED);
+[rule12] D1H>5.5 & D1H<=11.5 & D2H>8.5 & D1H>9.5 & D2H<=10.5 -> (1.0):(CL'=10) +  (0.0): (CL'=NOTDEFINED);
+[rule13] D1H>5.5 & D1H<=11.5 & D2H>8.5 & D1H>9.5 & D2H>10.5 -> (1.0):(CL'=11) +  (0.0): (CL'=NOTDEFINED);
+[rule14] D1H>5.5 & D1H>11.5 & D2H<=13.5 & D3H<=12.5 -> (0.5):(CL'=12) +  (0.5): (CL'=NOTDEFINED);
+[rule15] D1H>5.5 & D1H>11.5 & D2H<=13.5 & D3H>12.5 -> (1.0):(CL'=13) +  (0.0): (CL'=NOTDEFINED);
+[rule16] D1H>5.5 & D1H>11.5 & D2H>13.5 & D2H<=14.5 -> (1.0):(CL'=14) +  (0.0): (CL'=NOTDEFINED);
+[rule17] D1H>5.5 & D1H>11.5 & D2H>13.5 & D2H>14.5 & D3H<=15.5 -> (0.5):(CL'=15) +  (0.5): (CL'=NOTDEFINED);
+[rule18] D1H>5.5 & D1H>11.5 & D2H>13.5 & D2H>14.5 & D3H>15.5 -> (1.0):(CL'=16) +  (0.0): (CL'=NOTDEFINED);
+endmodule

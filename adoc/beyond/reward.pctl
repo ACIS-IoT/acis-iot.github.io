@@ -1,0 +1,5 @@
+const int T;
+
+// Reward Properties
+R{"Desynchronized"}=? [ C<=T ]
+

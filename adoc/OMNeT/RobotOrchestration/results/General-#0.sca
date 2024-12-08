@@ -1,0 +1,57 @@
+version 3
+run General-0-20241206-12:24:56-64342
+attr configname General
+attr datetime 20241206-12:24:56
+attr datetimef 20241206-122456
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsd ""
+attr iterationvarsf ""
+attr measurement ""
+attr network CranesOrchestration
+attr processid 64342
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+config image-path images
+config network CranesOrchestration
+config cmdenv-interactive true
+config record-eventlog true
+config **.recording true
+config **.recorder.moduleType "\"CSVRecorder\""
+config **.recorder.fileName "\"simulation.csv\""
+
+par CranesOrchestration.Robot0.Robot_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Robot0.Robot_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.Robot0.Robot_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Robot1.Robot_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Robot1.Robot_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.Robot1.Robot_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.Robot0_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.Robot0_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.Robot0_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.Robot1_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.Robot1_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.Robot1_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Robot0 typename "\"Robot\""
+par CranesOrchestration.Robot0 driftRate 0.1
+par CranesOrchestration.Robot1 typename "\"Robot\""
+par CranesOrchestration.Robot1 driftRate 0.01
+par CranesOrchestration.Gateway typename "\"InBox\""
+par CranesOrchestration typename "\"CranesOrchestration\""
+

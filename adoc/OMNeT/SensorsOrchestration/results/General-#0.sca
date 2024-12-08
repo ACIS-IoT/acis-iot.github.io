@@ -1,0 +1,71 @@
+version 3
+run General-0-20241206-21:36:35-16113
+attr configname General
+attr datetime 20241206-21:36:35
+attr datetimef 20241206-213635
+attr experiment General
+attr inifile omnetpp.ini
+attr iterationvars ""
+attr iterationvarsd ""
+attr iterationvarsf ""
+attr measurement ""
+attr network CranesOrchestration
+attr processid 16113
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+config image-path images
+config network CranesOrchestration
+config cmdenv-interactive true
+config record-eventlog true
+config **.recording true
+config **.recorder.moduleType "\"CSVRecorder\""
+config **.recorder.fileName "\"simulation.csv\""
+
+par CranesOrchestration.rain.Rain_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.rain.Rain_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.rain.Rain_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.wl.WL_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.wl.WL_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.wl.WL_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.wv.WV_TRANSMIT.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.wv.WV_TRANSMIT.channel disabled false
+attr mutable ""
+par CranesOrchestration.wv.WV_TRANSMIT.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.Rain_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.Rain_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.Rain_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.WL_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.WL_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.WL_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway.WV_LISTEN.channel typename "\"ned.DelayChannel\""
+par CranesOrchestration.Gateway.WV_LISTEN.channel disabled false
+attr mutable ""
+par CranesOrchestration.Gateway.WV_LISTEN.channel delay 0.1s
+attr mutable ""
+attr unit s
+par CranesOrchestration.Gateway typename "\"InBox\""
+par CranesOrchestration.wl typename "\"WL\""
+par CranesOrchestration.wl driftRate 0.02
+par CranesOrchestration.wv typename "\"WV\""
+par CranesOrchestration.wv driftRate 0.02
+par CranesOrchestration.rain typename "\"Rain\""
+par CranesOrchestration.rain driftRate 0.02
+par CranesOrchestration typename "\"CranesOrchestration\""
+
