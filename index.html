@@ -261,9 +261,7 @@
   <section id="deliverables" class="py-24 bg-white">
     <div class="container mx-auto px-6 lg:px-12">
       <div class="max-w-5xl mx-auto">
-        
-        <!-- Reports Subsection -->
-        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 reveal">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 reveal">
            <div>
              <h2 class="font-serif text-3xl md:text-4xl font-bold text-academic-dark mb-2">Project Deliverables</h2>
              <p class="text-slate-500">Official reports and technical documentation.</p>
@@ -288,7 +286,7 @@
                   CNRS Research Project Final Report
                 </td>
                 <td class="p-5 text-right">
-                  <a href="cnrs_project.pdf" class="text-academic-accent hover:text-amber-600 text-sm font-medium transition-colors">
+                  <a href="cnrs_project.pdf" download class="text-academic-accent hover:text-amber-600 text-sm font-medium transition-colors">
                     <i class="fas fa-download mr-1"></i> PDF
                   </a>
                 </td>
@@ -300,7 +298,7 @@
                   CNRS Research Project Progress Report
                 </td>
                 <td class="p-5 text-right">
-                  <a href="cnrs_project.pdf" class="text-academic-accent hover:text-amber-600 text-sm font-medium transition-colors">
+                  <a href="cnrs_project.pdf" download class="text-academic-accent hover:text-amber-600 text-sm font-medium transition-colors">
                     <i class="fas fa-download mr-1"></i> PDF
                   </a>
                 </td>
@@ -312,28 +310,28 @@
         <!-- Invited Talks Subsection -->
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 reveal">
            <div>
-             <h2 class="font-serif text-2xl md:text-3xl font-bold text-academic-dark mb-2">Invited Talks</h2>
-             <p class="text-slate-500">Seminars, keynotes, and guest lectures.</p>
+             <h3 class="font-serif text-2xl font-bold text-academic-dark mb-2">Invited Talks</h3>
+             <p class="text-slate-500">Seminars and conference presentations.</p>
            </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden reveal">
+        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden reveal mb-16">
           <table class="w-full text-left border-collapse">
             <thead class="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th class="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-24">ID</th>
-                <th class="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/4">Date</th>
-                <th class="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider">Title</th>
-                <th class="p-5 text-xs font-bold text-slate-500 uppercase tracking-wider w-32 text-right">Download</th>
+                <th class="p-5 text-xs font-bold uppercase tracking-wider w-24">ID</th>
+                <th class="p-5 text-xs font-bold uppercase tracking-wider w-1/4">Date</th>
+                <th class="p-5 text-xs font-bold uppercase tracking-wider">Title & Context</th>
+                <th class="p-5 text-xs font-bold uppercase tracking-wider w-32 text-right">Download</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
               <tr class="group hover:bg-blue-50/30 transition-colors">
-                <td class="p-5 font-mono text-sm text-academic-primary font-bold">I1</td>
+                <td class="p-5 font-mono text-sm text-academic-accent font-bold">I1</td>
                 <td class="p-5 text-sm text-slate-500">July 2023</td>
-                <td class="p-5 text-sm font-medium text-slate-800 group-hover:text-academic-primary transition-colors">
-                  <span class="font-semibold">Abdelhakim Baouya</span>, <em>Rigorous Design of Component-based Architecture: Research Activities</em>.
-                  <span class="block text-slate-500 text-xs mt-1">In ECE Department, <em>Concordia University, Montreal, CANADA</em></span>
+                <td class="p-5 text-sm text-slate-800">
+                  <div class="font-medium text-academic-dark mb-1">Rigorous Design of Component-based Architecture: Research Activities</div>
+                  <div class="text-slate-500 text-xs">Abdelhakim Baouya &bull; ECE Department, <span class="italic">Concordia University, Montreal, CANADA</span></div>
                 </td>
                 <td class="p-5 text-right">
                   <a href="presentation.pdf" class="text-academic-accent hover:text-amber-600 text-sm font-medium transition-colors">
@@ -364,18 +362,21 @@
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
               <div>
                 <h3 class="font-serif text-xl font-bold text-academic-dark mb-2 leading-snug">
-                  Rigorous Security Analysis of RabbitMQ Broker with Concurrent Stochastic Games
+                  <a href="iot24.html" class="hover:text-academic-primary transition-colors">Rigorous Security Analysis of RabbitMQ Broker with Concurrent Stochastic Games</a>
                 </h3>
                 <div class="text-slate-600 text-sm mb-3">
                   <span class="font-semibold">Abdelhakim Baouya</span>, Brahim Hamid, Levent Gürgen, Saddek Bensalem
                 </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 uppercase tracking-wide font-medium">
+                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 uppercase tracking-wide font-medium mb-3">
                   <span class="px-2 py-1 bg-white border border-slate-200 rounded">Internet of Things, Elsevier</span>
                   <span>July 2024</span>
                   <span class="text-rose-600 font-bold">IF=7.0</span>
                 </div>
+                <a href="iot24.html" class="inline-flex items-center text-xs font-bold text-academic-accent hover:text-academic-primary uppercase tracking-wider transition-colors">
+                  <i class="fas fa-file-code mr-1"></i> View Artifacts
+                </a>
               </div>
-              <a href="https://doi.org/10.1016/j.iot.2024.101161" class="flex-shrink-0 w-10 h-10 flex items-center justify-center border border-slate-300 rounded-full text-slate-400 hover:text-white hover:bg-academic-dark hover:border-academic-dark transition-all">
+              <a href="https://doi.org/10.1016/j.iot.2024.101161" target="_blank" class="flex-shrink-0 w-10 h-10 flex items-center justify-center border border-slate-300 rounded-full text-slate-400 hover:text-white hover:bg-academic-dark hover:border-academic-dark transition-all" title="DOI">
                 <i class="fas fa-external-link-alt text-sm"></i>
               </a>
             </div>
@@ -386,18 +387,21 @@
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
               <div>
                 <h3 class="font-serif text-xl font-bold text-academic-dark mb-2 leading-snug">
-                  Modeling and Analysis of Data Corruption Attacks and Energy Consumption Effects on Edge Servers
+                  <a href="soco24.html" class="hover:text-academic-primary transition-colors">Modeling and Analysis of Data Corruption Attacks and Energy Consumption Effects on Edge Servers</a>
                 </h3>
                 <div class="text-slate-600 text-sm mb-3">
                   <span class="font-semibold">Abdelhakim Baouya</span>, Brahim Hamid, Levent Gürgen, Saddek Bensalem
                 </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 uppercase tracking-wide font-medium">
+                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 uppercase tracking-wide font-medium mb-3">
                   <span class="px-2 py-1 bg-white border border-slate-200 rounded">Soft Computing, Springer</span>
                   <span>Sept 2024</span>
                   <span class="text-rose-600 font-bold">IF=3.1</span>
                 </div>
+                <a href="soco24.html" class="inline-flex items-center text-xs font-bold text-academic-accent hover:text-academic-primary uppercase tracking-wider transition-colors">
+                  <i class="fas fa-file-code mr-1"></i> View Artifacts
+                </a>
               </div>
-              <a href="https://doi.org/10.1007/s00500-025-10467-5" class="flex-shrink-0 w-10 h-10 flex items-center justify-center border border-slate-300 rounded-full text-slate-400 hover:text-white hover:bg-academic-dark hover:border-academic-dark transition-all">
+              <a href="https://doi.org/10.1007/s00500-025-10467-5" target="_blank" class="flex-shrink-0 w-10 h-10 flex items-center justify-center border border-slate-300 rounded-full text-slate-400 hover:text-white hover:bg-academic-dark hover:border-academic-dark transition-all" title="DOI">
                 <i class="fas fa-external-link-alt text-sm"></i>
               </a>
             </div>
@@ -408,18 +412,21 @@
             <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
               <div>
                 <h3 class="font-serif text-xl font-bold text-academic-dark mb-2 leading-snug">
-                  Detection and Mitigation of Clock Deviation in the Verification & Validation of Drone-aided Lifting Operations
+                  <a href="adhoc2024.html" class="hover:text-academic-primary transition-colors">Detection and Mitigation of Clock Deviation in the Verification & Validation of Drone-aided Lifting Operations</a>
                 </h3>
                 <div class="text-slate-600 text-sm mb-3">
                   <span class="font-semibold">Abdelhakim Baouya</span>, Brahim Hamid, Otmane Ait Mohamed, Saddek Bensalem
                 </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 uppercase tracking-wide font-medium">
+                <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 uppercase tracking-wide font-medium mb-3">
                   <span class="px-2 py-1 bg-white border border-slate-200 rounded">Ad Hoc Networks, Elsevier</span>
                   <span>Jan 2025</span>
                   <span class="text-rose-600 font-bold">IF=4.4</span>
                 </div>
+                <a href="adhoc2024.html" class="inline-flex items-center text-xs font-bold text-academic-accent hover:text-academic-primary uppercase tracking-wider transition-colors">
+                  <i class="fas fa-file-code mr-1"></i> View Artifacts
+                </a>
               </div>
-              <a href="https://doi.org/10.1016/j.adhoc.2024.103745" class="flex-shrink-0 w-10 h-10 flex items-center justify-center border border-slate-300 rounded-full text-slate-400 hover:text-white hover:bg-academic-dark hover:border-academic-dark transition-all">
+              <a href="https://doi.org/10.1016/j.adhoc.2024.103745" target="_blank" class="flex-shrink-0 w-10 h-10 flex items-center justify-center border border-slate-300 rounded-full text-slate-400 hover:text-white hover:bg-academic-dark hover:border-academic-dark transition-all" title="DOI">
                 <i class="fas fa-external-link-alt text-sm"></i>
               </a>
             </div>
